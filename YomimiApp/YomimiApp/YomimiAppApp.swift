@@ -11,7 +11,7 @@ import SwiftUI
 struct YomimiAppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            BookshelfView()
         }
     }
 }

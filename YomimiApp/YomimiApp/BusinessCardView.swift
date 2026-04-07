@@ -9,7 +9,7 @@ import SwiftUI
 
 struct BusinessCardView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Text("名刺（プレビュー・選択・シェア）")
     }
 }
 

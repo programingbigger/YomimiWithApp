@@ -8,10 +8,10 @@
 import SwiftUI
 
 @main
-struct YomimiAppApp: App {
+struct YomimiApp: App {
     var body: some Scene {
         WindowGroup {
-            BookshelfView()
+            HomeView()
         }
     }
 }

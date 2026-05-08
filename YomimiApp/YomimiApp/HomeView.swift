@@ -16,6 +16,8 @@ struct HomeView: View {
             
             // 通常のタブ（カメラは除く）
             TabView {
+                
+                // 本棚ビュー
                 BookshelfView()
                     .tabItem {
                         Label("本棚", systemImage: "books.vertical.fill")
@@ -27,17 +29,19 @@ struct HomeView: View {
                         Label("お楽しみ", systemImage: "tree.fill")
                     }
                 
-                // カメラの場所を空席にする
+                // スキャンビュー
                 Color.clear
                     .tabItem {
                         Label("", systemImage: "")
                     }
                 
+                // 名刺ビュー
                 BusinessCardView()
                     .tabItem {
                         Label("名刺", systemImage: "person.text.rectangle.fill")
                     }
                 
+                // 設定ビュー
                 SettingsView()
                     .tabItem {
                         Label("設定", systemImage: "gearshape.fill")

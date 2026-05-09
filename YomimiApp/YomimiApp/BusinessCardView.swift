@@ -61,8 +61,8 @@ struct BusinessCardView: View {
             .padding(.bottom, 20) // タブのための余白
             
         }
-        .background(Color("AppBackground"))
         .frame(maxWidth: .infinity,  maxHeight: .infinity)
+        .background(Color("AppBackground"))
     }
 }
 

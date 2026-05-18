@@ -72,10 +72,17 @@ struct SettingsView: View {
                             Text("プロフィール")
                             Spacer()
                         }
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white)
-                            .shadow(color: .black.opacity(0.08), radius: 8, y:2)
-                            .frame(height: 150)
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .shadow(color: .black.opacity(0.08), radius: 8, y:2)
+                                .frame(height: 150)
+                            VStack {
+                                Text("名前を変更")
+                                Text("アイコンを変更")
+                            }
+                        }
+
                     }.padding(16)
                     
                     
@@ -85,10 +92,16 @@ struct SettingsView: View {
                             Text("アプリ設定")
                             Spacer()
                         }
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white)
-                            .shadow(color: .black.opacity(0.08), radius: 8, y:2)
-                            .frame(height: 150)
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .shadow(color: .black.opacity(0.08), radius: 8, y:2)
+                                .frame(height: 150)
+                            VStack {
+                                Text("ダークモード")
+                                Text("通知設定")
+                            }
+                        }
                     }.padding(16)
                     
                     // データ
@@ -97,10 +110,17 @@ struct SettingsView: View {
                             Text("データ")
                             Spacer()
                         }
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white)
-                            .shadow(color: .black.opacity(0.08), radius: 8, y:2)
-                            .frame(height: 150)
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .shadow(color: .black.opacity(0.08), radius: 8, y:2)
+                                .frame(height: 150)
+                            VStack() {
+                                Text("🗑️すべてのデータを削除")
+                                    .foregroundStyle(Color(.red))
+                                    .bold()
+                            }
+                        }
                     }.padding(16)
                 }
             }

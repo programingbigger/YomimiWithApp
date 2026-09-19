@@ -16,9 +16,17 @@ struct BarcodeScannerView: View {
         NavigationStack{
             VStack(alignment: .center) {
                 
+                @State var scannedISBN: String?
+                
                 // スキャン場所
-                Capsule()
-                    .frame(width: 300, height: 400)
+                ISBNScannerView { isbn in
+                        scannedISBN = isbn
+                }
+                .frame(width: 300, height: 300)
+                
+                if let scannedISBN {
+                    Text("取得したISBN: \(scannedISBN)")
+                }
                 
                 // 手動入力
                 Button {

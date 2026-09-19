@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本棚アプリ UI モックアップ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #F7F4EF;
+    --surface: #FFFFFF;
+    --text-primary: #1C1917;
+    --text-secondary: #78716C;
+    --text-tertiary: #A8A29E;
+    --accent: #8B5E3C;
+    --accent-light: #F0E6DA;
+    --accent-mid: #C4956A;
+    --border: #E7E2DC;
+    --tab-active: #8B5E3C;
+    --tab-inactive: #B8AFA7;
+    --green: #4A7C59;
+    --blue: #3B6EA5;
+    --gray: #9E9189;
+    --shadow: 0 2px 16px rgba(139,94,60,0.10);
+    --success: #4A7C59;
+    --success-light: #E8F3EC;
+    --warning: #B45309;
+    --warning-light: #FEF3C7;
+  }
+
+  body {
+    background: #E8E3DC;
+    font-family: 'Noto Sans JP', sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    padding: 40px;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  /* ===== 画面ラベル ===== */
+  .screen-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .screen-label {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: #7D6E62;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.6);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .screen-sublabel {
+    font-size: 10px;
+    color: #9E8E82;
+    background: rgba(255,255,255,0.4);
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-top: -6px;
+  }
+
+  /* ===== iPhoneフレーム ===== */
+  .phone {
+    width: 320px;
+    height: 640px;
+    background: var(--surface);
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 8px #2A2420,
+      0 0 0 10px #3D3530,
+      0 32px 64px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.15);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* ノッチ */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 30px;
+    background: #2A2420;
+    border-radius: 0 0 20px 20px;
+    z-index: 100;
+  }
+
+  /* ===== ステータスバー ===== */
+  .status-bar {
+    height: 44px;
+    background: var(--bg);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 24px 6px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .status-time { font-size: 12px; font-weight: 600; }
+  .status-icons { display: flex; gap: 4px; align-items: center; }
+  .status-icons span { font-size: 11px; }
+
+  /* ===== ナビゲーションバー ===== */
+  .nav-bar {
+    background: var(--bg);
+    padding: 8px 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .nav-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  .nav-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: 300;
+    box-shadow: 0 2px 8px rgba(139,94,60,0.3);
+  }
+  .nav-back {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    display: flex; align-items: center; gap: 2px;
+  }
+  .nav-action {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ===== スクロールコンテンツ ===== */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg);
+    scrollbar-width: none;
+  }
+  .content::-webkit-scrollbar { display: none; }
+
+  /* ===== タブバー ===== */
+  .tab-bar {
+    height: 72px;
+    background: rgba(247,244,239,0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding-top: 4px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    padding-top: 4px;
+  }
+  .tab-item.scan-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+  }
+  .scan-center-btn {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid white;
+    box-shadow: 0 2px 10px rgba(139,94,60,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    margin-bottom: 2px;
+  }
+  .tab-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .tab-text {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .tab-item.active .tab-icon,
+  .tab-item.active .tab-text { color: var(--tab-active); }
+  .tab-item:not(.active):not(.scan-center) .tab-icon,
+  .tab-item:not(.active):not(.scan-center) .tab-text { color: var(--tab-inactive); }
+
+  /* ===== 検索バー ===== */
+  .search-bar {
+    margin: 12px 16px 8px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .search-bar span { font-size: 14px; color: var(--text-tertiary); }
+  .search-bar p { font-size: 13px; color: var(--text-tertiary); }
+
+  /* ===== ステータスフィルター ===== */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    padding: 4px 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .filter-chip.all { background: var(--accent); color: white; }
+  .filter-chip.unread { background: #F0EDEA; color: var(--gray); }
+  .filter-chip.reading { background: #E8F0F8; color: var(--blue); }
+  .filter-chip.done { background: #E8F3EC; color: var(--green); }
+
+  /* ===== 本グリッド ===== */
+  .book-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 0 16px 16px;
+  }
+  .book-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+  }
+  .book-cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  }
+  .book-cover-img {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+  .book-cover-img.c1 { background: linear-gradient(135deg, #2C3E6B, #4A6FA5); }
+  .book-cover-img.c2 { background: linear-gradient(135deg, #4A7C59, #7BAF6C); }
+  .book-cover-img.c3 { background: linear-gradient(135deg, #8B3A3A, #C46B6B); }
+  .book-cover-img.c4 { background: linear-gradient(135deg, #5B4A8B, #8B7ABF); }
+  .book-cover-img.c5 { background: linear-gradient(135deg, #7C5A3A, #BF9060); }
+  .book-cover-img.c6 { background: linear-gradient(135deg, #3A6B7C, #6AAFBF); }
+  .status-dot {
+    position: absolute;
+    bottom: 5px; right: 5px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid white;
+  }
+  .dot-done { background: var(--green); }
+  .dot-reading { background: var(--blue); }
+  .dot-unread { background: var(--gray); }
+  .book-title {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  /* ===== 本詳細画面 ===== */
+  .detail-cover-area {
+    background: linear-gradient(180deg, #2C3E6B 0%, #3D5280 100%);
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+  }
+  .detail-cover {
+    width: 80px; height: 120px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+  .detail-cover-info { flex: 1; }
+  .detail-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .detail-author {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 10px;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .badge-done { background: rgba(74,124,89,0.3); color: #90E0A8; border: 1px solid rgba(74,124,89,0.5); }
+  .badge-reading { background: rgba(59,110,165,0.3); color: #90C0E8; border: 1px solid rgba(59,110,165,0.5); }
+  .badge-unread { background: rgba(158,145,137,0.3); color: #D0C8C4; border: 1px solid rgba(158,145,137,0.5); }
+
+  /* 詳細フィールド */
+  .detail-section {
+    background: white;
+    border-radius: 12px;
+    margin: 12px 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .detail-section-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 14px 6px;
+  }
+  .detail-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .detail-row-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    width: 68px;
+    flex-shrink: 0;
+  }
+  .detail-row-value {
+    font-size: 13px;
+    color: var(--text-primary);
+    flex: 1;
+  }
+  .detail-row-value.placeholder { color: var(--text-tertiary); }
+  .rating-stars { color: var(--accent-mid); font-size: 14px; letter-spacing: 1px; }
+
+  .memo-area {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .memo-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .memo-placeholder {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-style: italic;
+  }
+
+  /* ===== スキャン画面 ===== */
+  .scan-viewfinder {
+    margin: 20px 24px 16px;
+    aspect-ratio: 1;
+    border-radius: 20px;
+    background: #1A1410;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .scan-overlay {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(rgba(0,0,0,0.5) 30%, transparent 30%, transparent 70%, rgba(0,0,0,0.5) 70%);
+  }
+  .scan-frame {
+    position: absolute;
+    width: 56%; height: 28%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255,255,255,0.9);
+    border-radius: 4px;
+  }
+  .scan-line {
+    position: absolute;
+    width: 56%; height: 2px;
+    background: linear-gradient(90deg, transparent, #FF5A1F, transparent);
+    top: 48%;
+    left: 22%;
+    animation: scanLine 2s ease-in-out infinite;
+  }
+  @keyframes scanLine {
+    0%, 100% { top: 38%; opacity: 0.8; }
+    50% { top: 58%; opacity: 1; }
+  }
+  .scan-corner {
+    position: absolute;
+    width: 16px; height: 16px;
+    border-color: var(--accent-mid);
+    border-style: solid;
+  }
+  .scan-corner.tl { top: 32%; left: 22%; border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
+  .scan-corner.tr { top: 32%; right: 22%; border-width: 3px 3px 0 0; border-radius: 0 3px 0 0; }
+  .scan-corner.bl { bottom: 32%; left: 22%; border-width: 0 0 3px 3px; border-radius: 0 0 0 3px; }
+  .scan-corner.br { bottom: 32%; right: 22%; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
+  .scan-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 0 24px;
+    line-height: 1.6;
+  }
+  .scan-manual-btn {
+    margin: 12px 24px 0;
+    padding: 12px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  /* ===== 統合登録画面（BookRegistrationView）===== */
+
+  /* スキャン結果バナー */
+  .scan-result-banner {
+    margin: 12px 16px 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .scan-result-banner.success {
+    background: var(--success-light);
+    border: 1px solid rgba(74,124,89,0.3);
+  }
+  .scan-result-banner.failure {
+    background: var(--warning-light);
+    border: 1px solid rgba(180,83,9,0.3);
+  }
+  .banner-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .banner-text-success { font-size: 11px; color: #166534; line-height: 1.5; }
+  .banner-text-failure { font-size: 11px; color: #92400E; line-height: 1.5; }
+
+  /* 書影エリア（成功時） */
+  .reg-cover-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px 4px;
+  }
+  .reg-cover {
+    width: 64px; height: 96px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .reg-cover-info { flex: 1; }
+  .reg-cover-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 3px;
+  }
+  .reg-cover-author {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .reg-api-source {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 7px;
+    display: inline-block;
+  }
+
+  /* フォームセクション */
+  .form-section {
+    background: white;
+    border-radius: 12px;
+    margin: 0 16px 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .form-section-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 14px 6px;
+  }
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 14px 10px;
+    border-top: 1px solid var(--border);
+    gap: 5px;
+  }
+  .form-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+  }
+  .form-label .required { color: #E74C3C; margin-left: 2px; }
+  .form-input {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-family: 'Noto Sans JP', sans-serif;
+    width: 100%;
+  }
+  .form-input.prefilled {
+    background: white;
+    border-color: rgba(74,124,89,0.3);
+    color: var(--text-primary);
+  }
+  .form-input.focused { border-color: var(--accent-mid); background: white; }
+  .form-input.ph { color: var(--text-tertiary); }
+  .form-textarea {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 11px;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-family: 'Noto Sans JP', sans-serif;
+    width: 100%;
+    min-height: 56px;
+    resize: none;
+  }
+
+  /* ===== 登録ボタン ===== */
+  .confirm-btn {
+    margin: 8px 16px;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .confirm-btn.primary { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(139,94,60,0.3); }
+  .confirm-btn.secondary { background: white; color: var(--text-secondary); border: 1.5px solid var(--border); }
+
+  /* ===== 設定画面 ===== */
+  .setting-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    margin: 12px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    gap: 8px;
+  }
+  .avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    border: 2px solid var(--accent-mid);
+  }
+  .profile-name {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .profile-stats {
+    display: flex;
+    gap: 24px;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 10px; color: var(--text-tertiary); }
+
+  .setting-group {
+    background: white;
+    border-radius: 12px;
+    margin: 0 16px 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .setting-row {
+    display: flex;
+    align-items: center;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-icon { font-size: 16px; width: 24px; text-align: center; }
+  .setting-text { flex: 1; font-size: 13px; color: var(--text-primary); }
+  .setting-arrow { font-size: 11px; color: var(--text-tertiary); }
+  .setting-group-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 16px 4px;
+  }
+
+  /* ===== 名刺画面 ===== */
+  .card-preview {
+    margin: 16px;
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .card-intro {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .card-book {
+    aspect-ratio: 2/3;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .card-book.b1 { background: linear-gradient(135deg, #2C3E6B, #4A6FA5); }
+  .card-book.b2 { background: linear-gradient(135deg, #4A7C59, #7BAF6C); }
+  .card-book.b3 { background: linear-gradient(135deg, #8B3A3A, #C46B6B); }
+  .card-book.b4 { background: linear-gradient(135deg, #5B4A8B, #8B7ABF); }
+  .card-book.b5 { background: linear-gradient(135deg, #7C5A3A, #BF9060); }
+  .card-book.b6 { background: linear-gradient(135deg, #3A6B7C, #6AAFBF); }
+  .card-book.b7 { background: linear-gradient(135deg, #6B3A5B, #BF6AAF); }
+  .card-book.b8 { background: linear-gradient(135deg, #2C5B3A, #4A9F6B); }
+  .card-book.empty { background: var(--bg); border: 1.5px dashed var(--border); font-size: 14px; color: var(--text-tertiary); }
+  .card-share-btn {
+    width: 100%;
+    padding: 12px;
+    background: #1DA1F2;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .card-select-count {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- S-01: 本棚（ホーム） -->
+<div class="screen-wrap">
+  <div class="screen-label">S-01 · 本棚（ホーム）</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="nav-bar">
+      <div style="width:32px;"></div>
+      <div class="nav-title">📚 本棚</div>
+      <div style="width:32px;"></div>
+    </div>
+    <div class="content">
+      <div class="search-bar">
+        <span>🔍</span>
+        <p>タイトル・著者で検索</p>
+      </div>
+      <div class="filter-row">
+        <div class="filter-chip all">すべて 12</div>
+        <div class="filter-chip unread">未読 5</div>
+        <div class="filter-chip reading">読中 3 ›</div>
+        <div class="filter-chip done">読了 4</div>
+      </div>
+      <div style="padding: 0 16px 8px; font-size:10px; color:var(--text-tertiary);">💡 読み終わったら「読中」→ 本をタップ → ステータス変更</div>
+      <div class="book-grid">
+        <div class="book-card">
+          <div class="book-cover"><div class="book-cover-img c1">📘</div><div class="status-dot dot-done"></div></div>
+          <div class="book-title">夜のピクニック</div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover"><div class="book-cover-img c2">📗</div><div class="status-dot dot-reading"></div></div>
+          <div class="book-title">羊と鋼の森</div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover"><div class="book-cover-img c3">📕</div><div class="status-dot dot-unread"></div></div>
+          <div class="book-title">アルジャーノンに花束を</div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover"><div class="book-cover-img c4">📙</div><div class="status-dot dot-done"></div></div>
+          <div class="book-title">銀河鉄道の夜</div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover"><div class="book-cover-img c5">📒</div><div class="status-dot dot-reading"></div></div>
+          <div class="book-title">クスノキの番人</div>
+        </div>
+        <div class="book-card">
+          <div class="book-cover"><div class="book-cover-img c6">📓</div><div class="status-dot dot-unread"></div></div>
+          <div class="book-title">52ヘルツのクジラたち</div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><div class="tab-icon">📚</div><div class="tab-text">本棚</div></div>
+      <div class="tab-item scan-center"><div class="scan-center-btn">📷</div></div>
+      <div class="tab-item"><div class="tab-icon">🪪</div><div class="tab-text">名刺</div></div>
+      <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-text">設定</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S-02: スキャン画面 -->
+<div class="screen-wrap">
+  <div class="screen-label">S-02 · スキャン画面</div>
+  <div class="phone">
+    <div class="status-bar" style="background:#1A1410;">
+      <span class="status-time" style="color:white;">9:41</span>
+      <div class="status-icons" style="color:white;"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="nav-bar" style="background:#1A1410; border-color:#333;">
+      <div class="nav-back" style="color:#C4956A;">✕ 閉じる</div>
+      <div class="nav-title" style="color:white; font-size:15px;">バーコードをスキャン</div>
+      <div style="width:48px;"></div>
+    </div>
+    <div class="content" style="background:#1A1410;">
+      <div class="scan-viewfinder">
+        <div class="scan-overlay"></div>
+        <div class="scan-frame"></div>
+        <div class="scan-line"></div>
+        <div class="scan-corner tl"></div>
+        <div class="scan-corner tr"></div>
+        <div class="scan-corner bl"></div>
+        <div class="scan-corner br"></div>
+      </div>
+      <p class="scan-hint">本の裏表紙にあるISBNバーコードを<br>枠の中に合わせてください</p>
+      <button class="scan-manual-btn">手動で入力する</button>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><div class="tab-icon">📚</div><div class="tab-text">本棚</div></div>
+      <div class="tab-item scan-center"><div class="scan-center-btn">📷</div></div>
+      <div class="tab-item"><div class="tab-icon">🪪</div><div class="tab-text">名刺</div></div>
+      <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-text">設定</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S-03: 統合登録画面（スキャン成功パターン） -->
+<div class="screen-wrap">
+  <div class="screen-label">S-03 · BookRegistrationView</div>
+  <div class="screen-sublabel">✅ スキャン成功 / isScanSuccess = true</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="nav-bar">
+      <div class="nav-back">← 戻る</div>
+      <div class="nav-title" style="font-size:14px;">本を登録</div>
+      <div style="width:48px;"></div>
+    </div>
+    <div class="content">
+
+      <!-- 成功バナー -->
+      <div class="scan-result-banner success">
+        <div class="banner-icon">✅</div>
+        <div class="banner-text-success">バーコードから取得しました。内容を確認して登録してください。</div>
+      </div>
+
+      <!-- 書影＋タイトル（APIから取得済み） -->
+      <div class="reg-cover-row">
+        <div class="reg-cover" style="background: linear-gradient(135deg, #2C3E6B, #4A6FA5);">📘</div>
+        <div class="reg-cover-info">
+          <div class="reg-cover-title">夜のピクニック</div>
+          <div class="reg-cover-author">恩田 陸 ／ 新潮社 ／ 2006年</div>
+          <div class="reg-api-source">Google Books より取得</div>
+        </div>
+      </div>
+
+      <!-- 書誌情報（編集可） -->
+      <div style="padding: 10px 16px 4px;">
+        <div style="font-size:10px; font-weight:600; color:var(--text-tertiary); letter-spacing:0.08em; text-transform:uppercase;">書誌情報（編集できます）</div>
+      </div>
+      <div class="form-section">
+        <div class="form-row" style="border-top:none;">
+          <div class="form-label">タイトル <span class="required">*</span></div>
+          <div class="form-input prefilled">夜のピクニック</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">著者名</div>
+          <div class="form-input prefilled">恩田 陸</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">ジャンル</div>
+          <div class="form-input prefilled">青春小説</div>
+        </div>
+      </div>
+
+      <!-- 読書メモ -->
+      <div class="form-section">
+        <div class="form-section-title">📝 読書メモ（任意）</div>
+        <div class="form-row" style="border-top:none;">
+          <div class="form-textarea ph">今感じたことや感想をメモ…</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">オススメ度</div>
+          <div style="display:flex; gap:6px; padding-top:2px;">
+            <span style="font-size:20px; color:var(--border);">★</span>
+            <span style="font-size:20px; color:var(--border);">★</span>
+            <span style="font-size:20px; color:var(--border);">★</span>
+            <span style="font-size:20px; color:var(--border);">★</span>
+            <span style="font-size:20px; color:var(--border);">★</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="confirm-btn primary">📚 本棚に登録する</button>
+      <div style="height:12px;"></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><div class="tab-icon">📚</div><div class="tab-text">本棚</div></div>
+      <div class="tab-item scan-center"><div class="scan-center-btn">📷</div></div>
+      <div class="tab-item"><div class="tab-icon">🪪</div><div class="tab-text">名刺</div></div>
+      <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-text">設定</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S-03: 統合登録画面（スキャン失敗パターン） -->
+<div class="screen-wrap">
+  <div class="screen-label">S-03 · BookRegistrationView</div>
+  <div class="screen-sublabel">⚠️ スキャン失敗 / isScanSuccess = false</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="nav-bar">
+      <div class="nav-back">← 戻る</div>
+      <div class="nav-title" style="font-size:14px;">本を登録</div>
+      <div style="width:48px;"></div>
+    </div>
+    <div class="content">
+
+      <!-- 失敗バナー -->
+      <div class="scan-result-banner failure">
+        <div class="banner-icon">⚠️</div>
+        <div class="banner-text-failure">バーコードを読み取れませんでした。情報を手動で入力してください。</div>
+      </div>
+
+      <!-- 書影なし（手動入力モード） -->
+      <div style="padding: 10px 16px 4px; margin-top: 4px;">
+        <div style="font-size:10px; font-weight:600; color:var(--text-tertiary); letter-spacing:0.08em; text-transform:uppercase;">書誌情報</div>
+      </div>
+      <div class="form-section">
+        <div class="form-row" style="border-top:none;">
+          <div class="form-label">タイトル <span class="required">*</span></div>
+          <div class="form-input focused">夜のピクニック</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">著者名</div>
+          <div class="form-input">恩田 陸</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">出版社</div>
+          <div class="form-input ph">例：新潮社</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">ジャンル</div>
+          <div class="form-input ph">例：青春小説</div>
+        </div>
+      </div>
+
+      <!-- 読書メモ -->
+      <div class="form-section">
+        <div class="form-section-title">📝 読書メモ（任意）</div>
+        <div class="form-row" style="border-top:none;">
+          <div class="form-textarea ph">今感じたことや感想をメモ…</div>
+        </div>
+        <div class="form-row">
+          <div class="form-label">オススメ度</div>
+          <div style="display:flex; gap:6px; padding-top:2px;">
+            <span style="font-size:20px; color:var(--border);">★</span>
+            <span style="font-size:20px; color:var(--border);">★</span>
+            <span style="font-size:20px; color:var(--border);">★</span>
+            <span style="font-size:20px; color:var(--border);">★</span>
+            <span style="font-size:20px; color:var(--border);">★</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="confirm-btn primary">📚 本棚に登録する</button>
+      <div style="height:12px;"></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><div class="tab-icon">📚</div><div class="tab-text">本棚</div></div>
+      <div class="tab-item scan-center"><div class="scan-center-btn">📷</div></div>
+      <div class="tab-item"><div class="tab-icon">🪪</div><div class="tab-text">名刺</div></div>
+      <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-text">設定</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S-05: 本詳細 -->
+<div class="screen-wrap">
+  <div class="screen-label">S-05 · 本詳細（インライン編集）</div>
+  <div class="phone">
+    <div class="status-bar" style="background:#2C3E6B;">
+      <span class="status-time" style="color:white;">9:41</span>
+      <div class="status-icons" style="color:white;"><span>●●●</span></div>
+    </div>
+    <div class="nav-bar" style="background:#2C3E6B; border-color:rgba(255,255,255,0.1);">
+      <div class="nav-back" style="color:rgba(255,255,255,0.8);">← 本棚</div>
+      <div style="width:32px;"></div>
+      <div class="nav-action" style="color:rgba(255,255,255,0.9);">完了</div>
+    </div>
+    <div class="content">
+      <div class="detail-cover-area">
+        <div class="detail-cover">📘</div>
+        <div class="detail-cover-info">
+          <div class="detail-title">夜のピクニック</div>
+          <div class="detail-author">恩田 陸 ／ 新潮社</div>
+          <div class="status-badge badge-done">● 読了</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">📝 メモ（今感じたことをすぐ残す）</div>
+        <div class="memo-area">
+          <div class="memo-text">青春の一ページをリアルに描いた作品。歩行祭という非日常の中で描かれる友情と秘密が印象的だった。</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">読書記録</div>
+        <div class="detail-row">
+          <div class="detail-row-label">ステータス</div>
+          <div class="detail-row-value">読了 ›</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-row-label">読了日</div>
+          <div class="detail-row-value">2026年1月12日 ›</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-row-label">オススメ度</div>
+          <div class="detail-row-value"><span class="rating-stars">★★★★</span><span style="color:var(--border);">★</span></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">書誌情報</div>
+        <div class="detail-row">
+          <div class="detail-row-label">出版社</div>
+          <div class="detail-row-value">新潮社</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-row-label">出版日</div>
+          <div class="detail-row-value">2006年</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-row-label">ページ数</div>
+          <div class="detail-row-value">456ページ</div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active"><div class="tab-icon">📚</div><div class="tab-text">本棚</div></div>
+      <div class="tab-item scan-center"><div class="scan-center-btn">📷</div></div>
+      <div class="tab-item"><div class="tab-icon">🪪</div><div class="tab-text">名刺</div></div>
+      <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-text">設定</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S-06: 名刺 -->
+<div class="screen-wrap">
+  <div class="screen-label">S-06/07/08 · 名刺</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="nav-bar">
+      <div style="width:48px;"></div>
+      <div class="nav-title">🪪 名刺</div>
+      <div style="width:48px;"></div>
+    </div>
+    <div class="content">
+      <div class="card-preview">
+        <div class="card-select-count">10冊中 8冊を選択中</div>
+        <div class="card-grid">
+          <div class="card-book b1">📘</div>
+          <div class="card-book b2">📗</div>
+          <div class="card-book b3">📕</div>
+          <div class="card-book b4">📙</div>
+          <div class="card-book b5">📒</div>
+          <div class="card-book b6">📓</div>
+          <div class="card-book b7">📔</div>
+          <div class="card-book b8">📖</div>
+          <div class="card-book empty">＋</div>
+          <div class="card-book empty">＋</div>
+        </div>
+        <div class="card-intro">読書が好きで、夜景や光のある話が特に好きです✨<br>本を通じて色んな人と繋がりたいです！</div>
+        <button class="card-share-btn">𝕏 Xでシェアする</button>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">自己紹介文</div>
+        <div class="memo-area">
+          <div class="memo-text">読書が好きで、夜景や光のある話が特に好きです✨ 本を通じて色んな人と繋がりたいです！</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">本を選び直す</div>
+        <div class="detail-row" style="border-top:none;">
+          <div class="detail-row-label" style="width:100%;">本棚から最大10冊を選択</div>
+          <div class="setting-arrow">›</div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item"><div class="tab-icon">📚</div><div class="tab-text">本棚</div></div>
+      <div class="tab-item scan-center"><div class="scan-center-btn">📷</div></div>
+      <div class="tab-item active"><div class="tab-icon">🪪</div><div class="tab-text">名刺</div></div>
+      <div class="tab-item"><div class="tab-icon">⚙️</div><div class="tab-text">設定</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S-09: 設定 -->
+<div class="screen-wrap">
+  <div class="screen-label">S-09 · 設定</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div>
+    </div>
+    <div class="nav-bar">
+      <div style="width:48px;"></div>
+      <div class="nav-title">⚙️ 設定</div>
+      <div style="width:48px;"></div>
+    </div>
+    <div class="content">
+      <div class="setting-profile">
+        <div class="avatar">🧸</div>
+        <div class="profile-name">なみ ふみ</div>
+        <div class="profile-stats">
+          <div class="stat"><div class="stat-num">12</div><div class="stat-label">登録冊数</div></div>
+          <div class="stat"><div class="stat-num">4</div><div class="stat-label">読了</div></div>
+          <div class="stat"><div class="stat-num">3</div><div class="stat-label">読中</div></div>
+        </div>
+      </div>
+      <div class="setting-group-label">プロフィール</div>
+      <div class="setting-group">
+        <div class="setting-row"><div class="setting-icon">👤</div><div class="setting-text">名前を変更</div><div class="setting-arrow">›</div></div>
+        <div class="setting-row"><div class="setting-icon">🖼️</div><div class="setting-text">アイコンを変更</div><div class="setting-arrow">›</div></div>
+      </div>
+      <div class="setting-group-label">アプリ設定</div>
+      <div class="setting-group">
+        <div class="setting-row"><div class="setting-icon">🌙</div><div class="setting-text">ダークモード</div><div class="setting-arrow">›</div></div>
+        <div class="setting-row"><div class="setting-icon">🔔</div><div class="setting-text">通知設定</div><div class="setting-arrow">›</div></div>
+      </div>
+      <div class="setting-group-label">データ</div>
+      <div class="setting-group">
+        <div class="setting-row"><div class="setting-icon">🗑️</div><div class="setting-text" style="color:#E74C3C;">すべてのデータを削除</div><div class="setting-arrow">›</div></div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item"><div class="tab-icon">📚</div><div class="tab-text">本棚</div></div>
+      <div class="tab-item scan-center"><div class="scan-center-btn">📷</div></div>
+      <div class="tab-item"><div class="tab-icon">🪪</div><div class="tab-text">名刺</div></div>
+      <div class="tab-item active"><div class="tab-icon">⚙️</div><div class="tab-text">設定</div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

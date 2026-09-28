@@ -10,17 +10,31 @@ import SwiftUI
 struct BarcodeScannerView: View {
     
     @Environment(\.dismiss) var dismiss
-    @State var isShowingBookRegistrationView = false
+    @State var isShowingBookRegistrationView = false // 本の登録画面への遷移
+    @State var scannedISBN: String?
+    @State var bookSummary: BookSummary?
+    @State var isLoading = false
+    @State var errorMessage: String?
+    
+    let bookAPIService: BookAPIService = OpenBDService()
     
     var body: some View {
         NavigationStack{
             VStack(alignment: .center) {
                 
-                @State var scannedISBN: String?
-                
                 // スキャン場所
                 ISBNScannerView { isbn in
-                        scannedISBN = isbn
+                    scannedISBN = isbn
+                    Task {
+                        isLoading = true
+                        do {
+                            bookSummary = try await bookAPIService.fetchBookInfo(isbn: isbn)
+                        } catch {
+                            errorMessage = "取得に失敗しました: \(error)"
+                        }
+                        isLoading = false
+                    }
+                    
                 }
                 .frame(width: 300, height: 300)
                 
@@ -41,6 +55,32 @@ struct BarcodeScannerView: View {
                         .cornerRadius(12)
                 }.fullScreenCover(isPresented: $isShowingBookRegistrationView) {
                     BookRegistrationView() // 手動入力画面へ遷移
+                }
+                
+                // テスト用
+                Button("テスト: 仮のISBNで取得") {
+                    Task {
+                        isLoading = true
+                        do {
+                            bookSummary = try await bookAPIService.fetchBookInfo(isbn: "9784163918273")
+                        } catch {
+                            errorMessage = "取得に失敗しました: \(error)"
+                        }
+                        isLoading = false
+                    }
+                }
+                
+                if isLoading {
+                    ProgressView()
+                }
+                if let bookSummary {
+                    VStack(alignment: .leading) {
+                        Text(bookSummary.title ?? "タイトル不明")
+                        Text(bookSummary.author ?? "著者不明")
+                    }
+                }
+                if let errorMessage {
+                    Text(errorMessage).foregroundStyle(.red)
                 }
                 
                 Spacer()

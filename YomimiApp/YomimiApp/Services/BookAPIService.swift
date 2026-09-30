@@ -8,26 +8,15 @@
 import Foundation
 
 
-// ①どのAPI(openBD/Google Books/楽天)を使っても、最終的にこの形に揃える共通の型
-//   呼び出す側(BarcodeScannerViewなど)は、これだけ知っていればいい
-struct BookSummary {
-    let isbn: String?
-    let title: String?
-    let author: String?
-    let publisher: String?
-    let pubdate: String?
-    let coverURL: String?
-}
-
-// 2「ISBNを渡したら、書籍情報を返してくれること」という契約(プロトコル)
+// 1「ISBNを渡したら、書籍情報を返してくれること」という契約(プロトコル)
 //   ScannerViewControllerDelegateの時と同じ考え方。中身は無く、ルールだけ
 protocol BookAPIService {
     func fetchBookInfo(isbn: String) async throws -> BookSummary
 }
 
-// ３　共通で使うエラーの種類
+// 2　共通で使うエラーの種類
 enum BookAPIError: Error {
-    case invaidURL
+    case invalidURL
     case notFound
 }
 

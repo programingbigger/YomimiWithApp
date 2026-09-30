@@ -11,7 +11,7 @@ struct BookRegistrationView: View {
     
     @Environment(\.dismiss) var dismiss
     
-    let bookSummary: BookSummary? // 取得できた本の情報（失敗時はnil）
+    let bookAPISummary: BookAPISummary? // 取得できた本の情報（失敗時はnil）
     let isScanSuccess: Bool // スキャン成功有無
     
     var body: some View {
@@ -129,12 +129,12 @@ struct BookRegistrationView: View {
         
         #if DEBUG
         .onAppear{ // 画面に一回だけ現れるやつ
-            print("🟠 [BookRegistrationView] 受け取り: success=\(isScanSuccess), title=\(bookSummary?.title ?? "nil")")
+            print("🟠 [BookRegistrationView] 受け取り: success=\(isScanSuccess), title=\(bookAPISummary?.title ?? "nil")")
         }
         #endif
     }
 }
 
 #Preview {
-    BookRegistrationView(bookSummary: nil, isScanSuccess: false)
+    BookRegistrationView(bookAPISummary: nil, isScanSuccess: false)
 }

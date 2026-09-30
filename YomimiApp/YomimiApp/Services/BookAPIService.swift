@@ -11,7 +11,7 @@ import Foundation
 // 1「ISBNを渡したら、書籍情報を返してくれること」という契約(プロトコル)
 //   ScannerViewControllerDelegateの時と同じ考え方。中身は無く、ルールだけ
 protocol BookAPIService {
-    func fetchBookInfo(isbn: String) async throws -> BookSummary
+    func fetchBookInfo(isbn: String) async throws -> BookAPISummary
 }
 
 // 2　共通で使うエラーの種類

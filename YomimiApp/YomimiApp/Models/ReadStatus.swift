@@ -16,8 +16,8 @@ enum ReadStatus: String, Codable, CaseIterable {
     
     var label: String {
         switch self {
-        case .finished:  return "読了"
-        case .reading:  return "読中"
+        case .finished: return "読了"
+        case .reading: return "読中"
         case .tsundoku: return "積読" // 積読は定義として説明文をどこかに入れたほうが良さそう・・・読みたいとの違いをちゃんと提示できるように
         case .toread: return "読みたい！"
         }

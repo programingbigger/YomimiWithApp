@@ -26,7 +26,7 @@ private struct OpenBDResponse: Decodable {
 
 // 2　ISBNを受け取って、openBDを叩き、bookの情報を返す関数
 struct OpenBDService: BookAPIService {
-    func fetchBookInfo(isbn: String) async throws -> BookSummary {
+    func fetchBookInfo(isbn: String) async throws -> BookAPISummary {
         guard let url = URL(string: "https://api.openbd.jp/v1/get?isbn=\(isbn)") else {
             throw BookAPIError.invalidURL // 文字列からURLを組み立てられなかった場合にエラーを投げる
         }
@@ -54,8 +54,8 @@ struct OpenBDService: BookAPIService {
                 print("🟩 [OpenBDService] 取得成功: \(summary.title ?? "無題")")
                 #endif
         
-        //openBD独自の形式(summary) ⇨ 共通のServices/BookSummaryで定義した型へ変換する
-        return BookSummary(
+        //openBD独自の形式(summary) ⇨ 共通のServices/bookAPISummaryで定義した型へ変換する
+        return BookAPISummary(
             isbn: summary.isbn,
             title: summary.title,
             author: summary.author,

@@ -10,7 +10,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class Book {
+final class BookRecord {
     @Attribute(.unique) var id: UUID   // 将来のFirebase連携用（仕様書 3.2）
     var isbn: String?
     var title: String

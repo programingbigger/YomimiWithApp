@@ -13,7 +13,7 @@ struct BarcodeScannerView: View {
     @State private var isShowingBookRegistrationView = false // 登録画面 表示判定フラグ
     @State private var bookSearchManager = BookSearchManager() // バーコードからAPIを検索するクラス
     
-    private var isScanSuccess: Bool {bookSearchManager.bookSummary != nil} // スキャン情報が成功 取得判定フラグ
+    private var isScanSuccess: Bool {bookSearchManager.BookAPISummary != nil} // スキャン情報が成功 取得判定フラグ
     
     var body: some View {
         NavigationStack{
@@ -50,7 +50,7 @@ struct BarcodeScannerView: View {
             // スキャン成功時
             .fullScreenCover(isPresented: $isShowingBookRegistrationView) {
                 BookRegistrationView(
-                    bookSummary: bookSearchManager.bookSummary,
+                    bookAPISummary: bookSearchManager.BookAPISummary,
                     isScanSuccess: isScanSuccess
                 )
             }
@@ -77,10 +77,10 @@ struct BarcodeScannerView: View {
         if bookSearchManager.isLoading {
             ProgressView()
         }
-        if let bookSummary = bookSearchManager.bookSummary {
+        if let BookAPISummary = bookSearchManager.BookAPISummary {
             VStack(alignment: .leading) {
-                Text(bookSummary.title ?? "タイトル不明")
-                Text(bookSummary.author ?? "著者不明")
+                Text(BookAPISummary.title ?? "タイトル不明")
+                Text(BookAPISummary.author ?? "著者不明")
             }
         }
         if let errorMessage = bookSearchManager.errorMessage {
@@ -105,7 +105,7 @@ struct BarcodeScannerView: View {
         // 手動入力画面へ遷移
         }.fullScreenCover(isPresented: $isShowingBookRegistrationView) {
             BookRegistrationView(
-                bookSummary: nil,
+                bookAPISummary: nil,
                 isScanSuccess: false
             )
         }

@@ -24,7 +24,7 @@ class BookSearchManager {
     
     // 画面に見せる状態
     var scannedISBN: String?        // 読み取ったISBN
-    var bookSummary: BookSummary?   // 取得できた本の情報
+    var BookAPISummary: BookAPISummary?   // 取得できた本の情報
     var isLoading = false           // 取得中かどうか
     var errorMessage: String?       // 画面に出すエラー文章
     
@@ -36,14 +36,14 @@ class BookSearchManager {
         
         // （初期化）前回の結果をリセット
         scannedISBN = isbn
-        bookSummary = nil
+        BookAPISummary = nil
         errorMessage = nil
         
         // 検索処理
         isLoading = true
         
         do {
-            bookSummary = try await bookAPIServices.fetchBookInfo(isbn: isbn)
+            BookAPISummary = try await bookAPIServices.fetchBookInfo(isbn: isbn)
         } catch BookAPIError.notFound {
             errorMessage = "この本は見つかりませんでした"
         } catch {

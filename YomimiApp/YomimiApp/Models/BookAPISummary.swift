@@ -9,7 +9,7 @@ import Foundation
 
 // どのAPI(openBD/Google Books/楽天)を使っても、**最終的にこの形に揃えるアプリ内の共通の型**
 // 呼び出す側(BarcodeScannerViewなど)は、これだけ知っていればいい
-struct BookSummary {
+struct BookAPISummary {
     let isbn: String? // isbnコード
     let title: String? // 本のタイトル
     let author: String? // 著者名

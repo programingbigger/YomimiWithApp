@@ -18,7 +18,7 @@ final class ScannerViewController: UIViewController, AVCaptureMetadataOutputObje
     
     weak var delegate: ScannerViewControllerDelegate? // ScannerViewControllerDelegateというプロトコルのプロトコル指定（⇨型指定）
     private let session = AVCaptureSession()
-    private var didFireOnce = false // 連続検出で何度もコールバックされるのを防ぐ
+    private var didFireOnce = false // 通知をしたか？のフラグ。連続検出で何度もコールバックされるのを防ぐ
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -93,24 +93,27 @@ final class ScannerViewController: UIViewController, AVCaptureMetadataOutputObje
         }
     }
     
-    // カメラがバーコードらしきものを検出するたびに、AVFoundationが自動で呼び出す
+    // カメラがバーコードらしきものを検出するたびに、AVFoundationが自動で呼び出す。これはn回/s呼ばれる
     func metadataOutput(_ output: AVCaptureMetadataOutput
                         , didOutput metadataObjects: [AVMetadataObject]
                         , from connection: AVCaptureConnection) {
-        guard !didFireOnce else {return} // すでに検出済みならば以降は無視（ログが大量に流れるので、コメントは省略）
+        guard !didFireOnce else { return } // すでに検出済み(true)ならば以降は無視
         
-        guard let object = metadataObjects.first as? AVMetadataMachineReadableCodeObject else {
-            return
-        }
+        // 映っているバーコードのうち、ISBN(978/979)で始まるものだけを探す
+        let isbn = metadataObjects
+            .compactMap { object in
+                (object as? AVMetadataMachineReadableCodeObject)?.stringValue
+            }
+            .first { code in
+                code.hasPrefix("978") || code.hasPrefix("979")
+            }
         
-        guard let isbn = object.stringValue else {
-            #if DEBUG
-            print("🟥 [metadataOutput] バーコードは検出したが、stringValueの取得に失敗")
-            #endif
-            return
-        }
+        // 見つからない場合は何もしない
+        guard let isbn else { return }
         
+        // isbnを見つけたら（値が入ったら）、trueにしその後にスキャンをさせない
         didFireOnce = true
+        
         session.stopRunning()
         #if DEBUG
         print("🟩 [metadataOutput] ISBN検出成功: \(isbn) → カメラを停止し、delegateへ通知します")

@@ -17,7 +17,7 @@ private struct OpenBDSummary: Decodable {
     let cover: String?
 }
 
-// openBDは配列で帰ってくる & 見つからない場合を踏まえ、オプショナル型
+// openBDは配列で返ってくる & 見つからない場合を踏まえ、オプショナル型
 private struct OpenBDResponse: Decodable {
     let summary: OpenBDSummary?
 }
@@ -40,7 +40,7 @@ struct OpenBDService: BookAPIService {
         print("🌐 [OpenBDService] 生データ受信: \(data.count) bytes")
         #endif
         
-        // 生データを加工する処理（JSON + Swiftの型へ変換）
+        // 生データをOpenBDResponseに合わせて加工する処理（JSON + Swiftの型へ変換）
         let decoded = try JSONDecoder().decode([OpenBDResponse?].self, from: data)
         
         guard let response = decoded.first,            // １配列に1個目の要素はある？
@@ -54,7 +54,7 @@ struct OpenBDService: BookAPIService {
                 print("🟩 [OpenBDService] 取得成功: \(summary.title ?? "無題")")
                 #endif
         
-        //openBD独自の形式(summary) ⇨ 共通のBookSummaryへ変換する
+        //openBD独自の形式(summary) ⇨ 共通のServices/BookSummaryで定義した型へ変換する
         return BookSummary(
             isbn: summary.isbn,
             title: summary.title,

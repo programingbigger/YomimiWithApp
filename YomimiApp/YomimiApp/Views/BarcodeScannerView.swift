@@ -10,8 +10,10 @@ import SwiftUI
 struct BarcodeScannerView: View {
     
     @Environment(\.dismiss) var dismiss
-    @State private var isShowingBookRegistrationView = false // 本の登録画面への遷移
+    @State private var isShowingBookRegistrationView = false // 登録画面 表示判定フラグ
     @State private var bookSearchManager = BookSearchManager() // バーコードからAPIを検索するクラス
+    
+    private var isScanSuccess: Bool {bookSearchManager.bookSummary != nil} // スキャン情報が成功 取得判定フラグ
     
     var body: some View {
         NavigationStack{
@@ -45,6 +47,13 @@ struct BarcodeScannerView: View {
                     }
                 }
             }
+            // スキャン成功時
+            .fullScreenCover(isPresented: $isShowingBookRegistrationView) {
+                BookRegistrationView(
+                    bookSummary: bookSearchManager.bookSummary,
+                    isScanSuccess: isScanSuccess
+                )
+            }
         }
     }
     
@@ -53,6 +62,7 @@ struct BarcodeScannerView: View {
         ISBNScannerView { isbn in
             Task {
                 await bookSearchManager.search(isbn: isbn)
+                isShowingBookRegistrationView = true
             }
         }
         .frame(width: 300, height: 300)
@@ -92,8 +102,12 @@ struct BarcodeScannerView: View {
                 .padding(.vertical, 16)
                 .background(Color.white)
                 .cornerRadius(12)
+        // 手動入力画面へ遷移
         }.fullScreenCover(isPresented: $isShowingBookRegistrationView) {
-            BookRegistrationView() // 手動入力画面へ遷移
+            BookRegistrationView(
+                bookSummary: nil,
+                isScanSuccess: false
+            )
         }
     }
     
@@ -102,10 +116,14 @@ struct BarcodeScannerView: View {
         Button("テスト: 仮のISBNで取得") {
             Task {
                 await bookSearchManager.search(isbn: "9784163918273") // センスの哲学のISBN
+//                await bookSearchManager.search(isbn: "1923055032804") // JANコード
+//                await bookSearchManager.search(isbn: "19230032804") // 異常系コード
+                
+                // スキャン成功時に登録画面へ
+                isShowingBookRegistrationView = true
             }
         }
     }
-    
 }
 
 #Preview {

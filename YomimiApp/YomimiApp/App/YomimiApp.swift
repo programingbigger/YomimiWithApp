@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct YomimiApp: App {
@@ -13,5 +14,6 @@ struct YomimiApp: App {
         WindowGroup {
             HomeView()
         }
+        .modelContainer(for:BookRecord.self)
     }
 }

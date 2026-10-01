@@ -6,13 +6,20 @@
 //　S-01　本棚（ホーム）
 
 import SwiftUI
+import SwiftData
 
 struct BookshelfView: View {
     
     @State var searchBookTitle: String = ""
     
+    // 確認用
+    @Query(sort: \BookRecord.createdAt, order: .reverse) private var books: [BookRecord]
+    
     var body: some View {
         NavigationStack {
+            
+            Text("登録数: \(books.count)")
+            
             VStack {
                 
                 Divider()

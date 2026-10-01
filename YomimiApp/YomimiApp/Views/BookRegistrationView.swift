@@ -10,9 +10,31 @@ import SwiftUI
 struct BookRegistrationView: View {
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @State private var manager = BookRegistrationManager()
     
     let bookAPISummary: BookAPISummary? // 取得できた本の情報（失敗時はnil）
     let isScanSuccess: Bool // スキャン成功有無
+    
+    // フォーム入力値（スキャン成功時は init でプリフィル）
+    @State private var title: String
+    @State private var author: String
+    @State private var publisher: String
+    @State private var publishedDate: String
+    @State private var genre: String = "" // ジャンル
+    @State private var pageCountText: String = ""
+    @State private var status: ReadStatus = .tsundoku // 初期値は積読
+    @State private var finishedDate: Date = .now // 読了日
+    
+    init(bookAPISummary: BookAPISummary?, isScanSuccess: Bool) {
+        self.bookAPISummary = bookAPISummary
+        self.isScanSuccess = isScanSuccess
+        _title = State(initialValue: bookAPISummary?.title ?? "")
+        _author = State(initialValue: bookAPISummary?.author ?? "")
+        _publisher = State(initialValue: bookAPISummary?.publisher ?? "")
+        _publishedDate = State(initialValue: bookAPISummary?.pubdate ?? "")
+    }
+    
     
     var body: some View {
         NavigationStack() {
@@ -69,9 +91,15 @@ struct BookRegistrationView: View {
                                 .shadow(color: .black.opacity(0.08), radius: 8, y:2)
                                 .frame(height: 150)
                             VStack {
-                                Text("タイトル") // 入力できるボックスに
-                                Text("著者名")
+                                TextField("タイトル", text: $title)
+                                TextField("著者名", text: $author)
                             }
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.white)
+                                    .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+                            )
                         }
                     }
                     .padding(16)
@@ -89,18 +117,69 @@ struct BookRegistrationView: View {
                                 .shadow(color: .black.opacity(0.08), radius: 8, y:2)
                                 .frame(height: 150)
                             VStack {
-                                Text("出版社")
-                                Text("ジャンル")
-                                Text("感想や気づきを入力")
-                                Text("オススメ度") // 星 or 小数点第2位くらいまで入力できるような形へ
+                                TextField("出版社", text: $publisher)
+                                TextField("ジャンル", text: $genre)
+                                TextField("ページ数", text: $pageCountText)
+                                    .keyboardType(.numberPad)
+                                TextField("出版年月", text: $publishedDate)
+//                                Text("感想や気づきを入力")
+//                                Text("オススメ度") // 星 or 小数点第2位くらいまで入力できるような形へ
+                            }
+                            .padding(16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.white)
+                                    .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+                            )
+                        }
+                    }
+                    .padding(16)
+                    
+                    // 読書ステータス
+                    
+                    VStack {
+                        HStack {
+                            Text("📖 読書ステータス")
+                            Spacer()
+                        }
+                        VStack(spacing: 12) {
+                            Picker("ステータス", selection: $status) {
+                                ForEach(ReadStatus.allCases, id: \.self) { s in
+                                    Text(s.label).tag(s)
+                                }
+                            }
+                            
+                            // 読了の時だけ表示
+                            if status == .finished {
+                                DatePicker("読了日", selection: $finishedDate, displayedComponents: .date)
                             }
                         }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+                        )
                     }
                     .padding(16)
                     
                     // 本の情報 手動登録ボタン
                     Button {
-                        
+                        let book = BookRecord(
+                            isbn: bookAPISummary?.isbn,
+                            title: title,
+                            author: author,
+                            publisher: publisher.isEmpty ? nil : publisher,
+                            publishedDate: publishedDate.isEmpty ? nil : publishedDate,
+                            genre: genre.isEmpty ? nil : genre,
+                            thumbnailURL: bookAPISummary?.coverURL,
+                            status: status,
+                            finishedDate: status == .finished ? finishedDate : nil,
+                            pageCount: Int(pageCountText)
+                        )
+                        if manager.register(book, in: modelContext) {
+                            dismiss()
+                        }
                     } label: {
                         Text("📚本棚に登録する")
                             .font(.system(size: 14, weight: .bold))
@@ -109,6 +188,13 @@ struct BookRegistrationView: View {
                             .padding(.vertical, 16)
                             .background(Color("AccentColor"))
                             .cornerRadius(12)
+                    }
+                    
+                    // 失敗した時の文言
+                    if let message = manager.errorMessage {
+                        Text(message)
+                            .foregroundStyle(.red)
+                            .padding(.top, 8)
                     }
                 }
             }

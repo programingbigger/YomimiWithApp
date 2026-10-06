@@ -7,6 +7,33 @@
 
 import SwiftUI
 
+// 既存のRegistrationModeを拡張する形で、スキャン成功後のバナー表示の規格を設定（modeは画面に影響されてはいけない設計のため、このように記載）
+private extension RegistrationMode {
+    var bannerColor: Color {
+        switch self {
+        case .scanned, .manual: .green
+        case .scanFailed: .red
+        }
+    }
+    
+    var bannerIcon: String {
+        switch self {
+        case .scanned: "checkmark.circle.fill"
+        case .scanFailed: "exclamationmark.triangle.fill"
+        case .manual: "square.and.pencil"
+        }
+    }
+    
+    var bannerMessage: String {
+        switch self {
+        case .scanned:    "スキャンに成功しました！\n内容を確認して、本棚に登録しましょう"
+        case .scanFailed: "スキャンできませんでした。\nタイトルを入力して登録しましょう"
+        case .manual:     "手動で入力します。\nわかる範囲で入力してください"
+        }
+    }
+}
+
+// 登録画面本体
 struct BookRegistrationView: View {
     
     @Environment(\.dismiss) var dismiss
@@ -46,21 +73,21 @@ struct BookRegistrationView: View {
                 
                 VStack {
                     
-                    // 登録できなかったことのアラート
+                    // スキャン結果に応じたバナーを表示
                     ZStack {
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.green) // 失敗時は黄色
+                            .fill(mode.bannerColor)
                             .opacity(0.2)
                             .frame(height: 80)
                         HStack {
-                            Capsule()
+                            Image(systemName: mode.bannerIcon)
+                                .font(.system(size: 28))
+                                .foregroundStyle(mode.bannerColor)
                                 .frame(width: 50, height: 50)
-                            
-                            // 成功時
-                            Text("バーコードから取得しました。内容を確認して登録してください。")
-                            // 失敗時
-                            //                            Text("バーコードの読み取りに失敗しました。\n情報を手動で入力してください。")
+                            Text(mode.bannerMessage)
+                                .font(.subheadline)
                         }
+                        .padding(.horizontal, 16)
                     }
                     .padding(16)
                     
@@ -220,6 +247,7 @@ struct BookRegistrationView: View {
         #endif
     }
 }
+
 
 #Preview {
     BookRegistrationView(mode: .manual)

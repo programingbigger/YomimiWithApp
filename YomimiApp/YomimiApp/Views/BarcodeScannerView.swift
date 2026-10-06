@@ -113,9 +113,9 @@ struct BarcodeScannerView: View {
     private var testButton: some View {
         Button("テスト: 仮のISBNで取得") {
             Task {
-//                await bookSearchManager.search(isbn: "9784163918273") // センスの哲学のISBN
+                await bookSearchManager.search(isbn: "9784163918273") // センスの哲学のISBN
 //                await bookSearchManager.search(isbn: "1923055032804") // JANコード
-                await bookSearchManager.search(isbn: "19230032804") // 異常系コード
+//                await bookSearchManager.search(isbn: "19230032804") // 異常系コード
                 
                 // スキャン成功時に登録画面へ
                 registrationMode = modeAfterSearch()

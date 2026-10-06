@@ -8,11 +8,19 @@
 import SwiftUI
 
 struct BookDetailView: View {
+    
+    let book: BookRecord
+        
     var body: some View {
-        Text("本詳細")
+        Text(book.title)
+            .font(.title2)
+            .navigationTitle("本詳細")
+            .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 #Preview {
-    BookDetailView()
+    NavigationStack {
+        BookDetailView(book: BookRecord(title: "hogehoge"))
+    }
 }

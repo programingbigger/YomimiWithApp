@@ -12,7 +12,6 @@ struct BookshelfView: View {
     
     @State var searchBookTitle: String = ""
     
-    // 確認用
     @Query(sort: \BookRecord.createdAt, order: .reverse) private var books: [BookRecord]
     
     var body: some View {
@@ -45,13 +44,19 @@ struct BookshelfView: View {
                 // 本棚一覧
                 ScrollView {
                     LazyVGrid(columns: [GridItem(), GridItem(), GridItem()]) {
-                        ForEach(0..<100) { _ in
-                            VStack(alignment: .leading) {
-                                Capsule()
-                                    .frame(width: 100, height: 150)
-                                Text("本のタイトル")
+                        ForEach(books) { book in
+                            NavigationLink {
+                                BookDetailView(book: book)
+                            } label: {
+                                VStack(alignment: .leading) {
+                                    Capsule()
+                                        .frame(width: 100, height: 150)
+                                    Text(book.title)
+                                        .font(.caption) // キャプションモード
+                                        .lineLimit(2) // 最大2行に制限
+                                }
                             }
-                            .padding()
+                            .buttonStyle(.plain) // リンクの青文字化を防ぐ
                         }
                     }
                 }

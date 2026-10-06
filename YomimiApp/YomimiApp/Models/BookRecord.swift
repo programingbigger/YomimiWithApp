@@ -5,13 +5,24 @@
 //  Created by 奈宮史典 on 2026/09/30.
 //
 
+/*
+ 
+ ＜BookRecordクラスについて＞
+ ・呼び出す際に、titleは必須項目
+ ・status, createdat, updateat, idは必ず値が入る
+    ・statusは初期値は、「積読」(.tsundoku)
+ 
+ */
+
+
+
 // Models/Book.swift
 import Foundation
 import SwiftData
 
-@Model
+@Model // このクラスをSwiftDataの保存対象にする
 final class BookRecord {
-    @Attribute(.unique) var id: UUID   // 将来のFirebase連携用（仕様書 3.2）
+    @Attribute(.unique) var id: UUID   // 将来のFirebase連携用（仕様書 3.2）Attribute(.hogehoge)が特殊なルールを付ける
     var isbn: String?
     var title: String
     var author: String
@@ -36,7 +47,7 @@ final class BookRecord {
     init(
         id: UUID = UUID(),
         isbn: String? = nil,
-        title: String,
+        title: String, // titleは必須だから、このクラスを呼び出すための必要条件 ⇨ 値を必ず入れる設定にさせる
         author: String = "",
         publisher: String? = nil,
         publishedDate: String? = nil,

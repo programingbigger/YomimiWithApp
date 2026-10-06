@@ -10,10 +10,8 @@ import SwiftUI
 struct BarcodeScannerView: View {
     
     @Environment(\.dismiss) var dismiss
-    @State private var isShowingBookRegistrationView = false // 登録画面 表示判定フラグ
+    @State private var registrationMode: RegistrationMode?
     @State private var bookSearchManager = BookSearchManager() // バーコードからAPIを検索するクラス
-    
-    private var isScanSuccess: Bool {bookSearchManager.BookAPISummary != nil} // スキャン情報が成功 取得判定フラグ
     
     var body: some View {
         NavigationStack{
@@ -48,13 +46,18 @@ struct BarcodeScannerView: View {
                 }
             }
             // スキャン成功時
-            .fullScreenCover(isPresented: $isShowingBookRegistrationView) {
-                BookRegistrationView(
-                    bookAPISummary: bookSearchManager.BookAPISummary,
-                    isScanSuccess: isScanSuccess
-                )
+            .fullScreenCover(item: $registrationMode) { mode in
+                BookRegistrationView(mode: mode)
             }
         }
+    }
+    
+    // 検索結果から「どのモードを開くか」で決める
+    private func modeAfterSearch()-> RegistrationMode {
+        if let summary = bookSearchManager.BookAPISummary {
+            return .scanned(summary)
+        }
+        return .scanFailed
     }
     
     // カメラでISBNを読み取る部分
@@ -62,7 +65,7 @@ struct BarcodeScannerView: View {
         ISBNScannerView { isbn in
             Task {
                 await bookSearchManager.search(isbn: isbn)
-                isShowingBookRegistrationView = true
+                registrationMode = modeAfterSearch()
             }
         }
         .frame(width: 300, height: 300)
@@ -93,7 +96,7 @@ struct BarcodeScannerView: View {
     private var manualInputButton: some View {
         // 手動入力
         Button {
-            isShowingBookRegistrationView = true
+            registrationMode = .manual
         } label: {
             Text("手動で入力する")
                 .font(.system(size: 14, weight: .bold))
@@ -103,11 +106,6 @@ struct BarcodeScannerView: View {
                 .background(Color.white)
                 .cornerRadius(12)
         // 手動入力画面へ遷移
-        }.fullScreenCover(isPresented: $isShowingBookRegistrationView) {
-            BookRegistrationView(
-                bookAPISummary: nil,
-                isScanSuccess: false
-            )
         }
     }
     
@@ -115,12 +113,12 @@ struct BarcodeScannerView: View {
     private var testButton: some View {
         Button("テスト: 仮のISBNで取得") {
             Task {
-                await bookSearchManager.search(isbn: "9784163918273") // センスの哲学のISBN
+//                await bookSearchManager.search(isbn: "9784163918273") // センスの哲学のISBN
 //                await bookSearchManager.search(isbn: "1923055032804") // JANコード
-//                await bookSearchManager.search(isbn: "19230032804") // 異常系コード
+                await bookSearchManager.search(isbn: "19230032804") // 異常系コード
                 
                 // スキャン成功時に登録画面へ
-                isShowingBookRegistrationView = true
+                registrationMode = modeAfterSearch()
             }
         }
     }

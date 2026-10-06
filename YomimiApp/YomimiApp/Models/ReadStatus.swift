@@ -5,6 +5,11 @@
 //  Created by 奈宮史典 on 2026/09/30.
 //
 
+/*
+ aaa = ReadStatus.finished
+ status = aaa.label // 読了が出てくる
+ */
+
 import Foundation
 
 // ReadStatusのデータモデルを作成

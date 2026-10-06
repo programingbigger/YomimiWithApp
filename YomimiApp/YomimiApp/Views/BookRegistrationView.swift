@@ -13,9 +13,6 @@ struct BookRegistrationView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var manager = BookRegistrationManager()
     
-    let bookAPISummary: BookAPISummary? // 取得できた本の情報（失敗時はnil）
-    let isScanSuccess: Bool // スキャン成功有無
-    
     // フォーム入力値（スキャン成功時は init でプリフィル）
     @State private var title: String
     @State private var author: String
@@ -26,13 +23,16 @@ struct BookRegistrationView: View {
     @State private var status: ReadStatus = .tsundoku // 初期値は積読
     @State private var finishedDate: Date = .now // 読了日
     
-    init(bookAPISummary: BookAPISummary?, isScanSuccess: Bool) {
-        self.bookAPISummary = bookAPISummary
-        self.isScanSuccess = isScanSuccess
-        _title = State(initialValue: bookAPISummary?.title ?? "")
-        _author = State(initialValue: bookAPISummary?.author ?? "")
-        _publisher = State(initialValue: bookAPISummary?.publisher ?? "")
-        _publishedDate = State(initialValue: bookAPISummary?.pubdate ?? "")
+    // 書籍登録モード：BookRegistrationViewの引数
+    let mode: RegistrationMode
+    
+    init(mode: RegistrationMode) {
+        self.mode = mode
+        _title = State(initialValue:  mode.summary?.title ?? "")
+        _author = State(initialValue:  mode.summary?.author ?? "")
+        _publisher = State(initialValue:  mode.summary?.publisher ?? "")
+        _publishedDate = State(initialValue:  mode.summary?.pubdate ?? "")
+        
     }
     
     
@@ -166,13 +166,13 @@ struct BookRegistrationView: View {
                     // 本の情報 手動登録ボタン
                     Button {
                         let book = BookRecord(
-                            isbn: bookAPISummary?.isbn,
+                            isbn: mode.summary?.isbn,
                             title: title,
                             author: author,
                             publisher: publisher.isEmpty ? nil : publisher,
                             publishedDate: publishedDate.isEmpty ? nil : publishedDate,
                             genre: genre.isEmpty ? nil : genre,
-                            thumbnailURL: bookAPISummary?.coverURL,
+                            thumbnailURL: mode.summary?.coverURL,
                             status: status,
                             finishedDate: status == .finished ? finishedDate : nil,
                             pageCount: Int(pageCountText)
@@ -215,12 +215,12 @@ struct BookRegistrationView: View {
         
         #if DEBUG
         .onAppear{ // 画面に一回だけ現れるやつ
-            print("🟠 [BookRegistrationView] 受け取り: success=\(isScanSuccess), title=\(bookAPISummary?.title ?? "nil")")
+            print("🟠 [BookRegistrationView] 受け取り: success=\(mode.id), title=\(mode.summary?.title ?? "nil")")
         }
         #endif
     }
 }
 
 #Preview {
-    BookRegistrationView(bookAPISummary: nil, isScanSuccess: false)
+    BookRegistrationView(mode: .manual)
 }

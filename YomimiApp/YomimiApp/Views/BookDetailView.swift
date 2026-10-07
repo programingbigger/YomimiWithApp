@@ -6,6 +6,7 @@
 //　S-05　本詳細
 
 import SwiftUI
+import SwiftData
 
 // 白いカード（小見出し + 中身）
 private struct DetailSection<Content: View>: View {
@@ -63,7 +64,28 @@ private struct DetailRow: View {
 struct BookDetailView: View {
     
     // 書籍情報の読み取り
-    @Bindable var book: BookRecord
+    let book: BookRecord
+    
+    // 編集中の下書き（「完了」を押下するまで、bookに書き込まない）
+    @State private var draftMemo: String
+    @State private var draftRating: Int?
+    
+    @Environment(\.modelContext) private var modelContext // 保存の窓口
+    @Environment(\.dismiss) private var dismiss // 画面を閉じる操作
+    @State private var showDiscardAlet = false // アラートポップアップ判定
+    @State private var showSaveError = false // 保存に失敗したとき判定
+    
+    // 初期化（BookDetailViewを開いた瞬間に、現在のbookRecordの情報を受け取る）
+    init(book: BookRecord) {
+        self.book = book
+        _draftMemo = State(initialValue: book.memo ?? "")
+        _draftRating = State(initialValue: book.rating)
+    }
+    
+    // メモとおすすめ度が元の値から変わっているか？の判定
+    private var hasChanges: Bool {
+        draftMemo != (book.memo ?? "") || draftRating != book.rating
+    }
     
     // 感想を記載するメモ欄
     private var memoBinding: Binding<String> {
@@ -92,7 +114,7 @@ struct BookDetailView: View {
                 
                 // メモ
                 DetailSection(title: "📝 メモ（感想や思ったことを記録しよう！）") {
-                    TextEditor(text: memoBinding)
+                    TextEditor(text: $draftMemo)
                         .frame(minHeight: 120)
                         .scrollContentBackground(.hidden)
                         .padding(.horizontal, 10)
@@ -101,7 +123,7 @@ struct BookDetailView: View {
                 
                 // おすすめ度
                 DetailSection(title: "読書記録") {
-                    StarRatingView(rating: $book.rating)
+                    StarRatingView(rating: $draftRating)
                         .padding(.horizontal, 10)
                         .padding(.bottom, 8)
                 }
@@ -124,7 +146,49 @@ struct BookDetailView: View {
         .background(Color(.appBackground))
         .navigationTitle("本詳細")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true) // <マークの削除
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("< 戻る") {
+                    if hasChanges {
+                        showDiscardAlet = true
+                    } else {
+                        dismiss()
+                    }
+                }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("登録") { save() }
+            }
+        }
+        .alert("変更を破棄しますか？", isPresented: $showDiscardAlet) {
+            Button("破棄する", role: .destructive) { dismiss() }
+            Button("編集を続ける", role: .cancel) {}
+        } message: {
+            Text("保存されていない変更は失われます。")
+        }
+        .alert("保存に失敗しました", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) {}
+        }
     }
+    
+    // 完了：下書きをbookに描き戻して保存する
+    private func save() {
+        if draftMemo.isEmpty {
+            book.memo = nil
+        } else {
+            book.memo = draftMemo
+        }
+        book.rating = draftRating
+        book.updatedAt = .now // 更新日
+        do {
+            try modelContext.save()
+            dismiss()
+        } catch {
+            showSaveError = true
+        }
+    }
+    
 }
 
 #Preview {

@@ -27,8 +27,6 @@ struct BookshelfView: View {
     var body: some View {
         NavigationStack {
             
-            Text("登録数: \(filteredBooks.count)")
-            
             VStack {
                 
                 Divider()
@@ -41,11 +39,27 @@ struct BookshelfView: View {
                     .padding()
                 
                 // タグ &　絞り込み
-                HStack() {
-                    Button("すべて") { selectedStatus = nil }
-                    ForEach(ReadStatus.allCases, id: \.self) { status in
-                        Button(status.label) { selectedStatus = status }
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        StatusFilterChip(
+                            title: "すべて"
+                            , count: books.count
+                            , color: nil
+                            , isSelected: selectedStatus == nil) {
+                                selectedStatus = nil
+                            }
+                        
+                        ForEach(ReadStatus.allCases, id: \.self) { status in
+                                StatusFilterChip(
+                                    title: status.label
+                                    , count: books.filter { $0.status == status }.count
+                                    , color: status.color
+                                    , isSelected: selectedStatus == status) {
+                                        selectedStatus = status
+                                    }
+                        }
                     }
+                    .padding(.horizontal)
                 }
                 
                 //ヒント

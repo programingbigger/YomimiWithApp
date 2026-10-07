@@ -10,27 +10,18 @@ import SwiftUI
 struct StatusBadgeView: View {
     let status: ReadStatus
     
-    private var color: Color {
-        switch status {
-        case .finished: Color(.statusDone)
-        case .reading: Color(.statusReading)
-        case .tsundoku: Color(.statusUnread)
-        case .toread: Color(.statusToread)
-        }
-    }
-    
     var body: some View {
         HStack(spacing: 4) {
             Circle()
-                .fill(color)
+                .fill(status.color)
                 .frame(width: 6, height: 6)
             Text(status.label)
                 .font(.caption2)
-                .foregroundStyle(color)
+                .foregroundStyle(status.color)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .background(color.opacity(0.15))
+        .background(status.color.opacity(0.15))
         .clipShape(Capsule())
     }
 }

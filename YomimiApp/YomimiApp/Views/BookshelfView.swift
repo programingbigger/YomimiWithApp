@@ -49,11 +49,18 @@ struct BookshelfView: View {
                                 BookDetailView(book: book)
                             } label: {
                                 VStack(alignment: .leading) {
+                                    
+                                    // 書影
                                     BookCoverView(title: book.title, thumbnailURL: book.thumbnailURL)
                                         .frame(width: 100, height: 150)
+                                    
+                                    // 書籍タイトル
                                     Text(book.title)
                                         .font(.caption) // キャプションモード
                                         .lineLimit(2) // 最大2行に制限
+                                    
+                                    // ステータスバッジ(読みたい!や読了など)
+                                    StatusBadgeView(status: book.status)
                                 }
                             }
                             .buttonStyle(.plain) // リンクの青文字化を防ぐ

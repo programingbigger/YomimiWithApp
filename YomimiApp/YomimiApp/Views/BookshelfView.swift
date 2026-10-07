@@ -66,36 +66,44 @@ struct BookshelfView: View {
                 Text("💡読み終わったら「読中」→本をタップ→ステータス変更")
                 
                 // 本棚一覧
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.flexible(), alignment: .top)
-                                        , GridItem(.flexible(), alignment: .top)
-                                        , GridItem(.flexible(), alignment: .top)]) {
-                        ForEach(filteredBooks) { book in
-                            NavigationLink {
-                                BookDetailView(book: book)
-                            } label: {
-                                VStack(alignment: .leading) {
+                if filteredBooks.isEmpty {
+                    ContentUnavailableView(
+                        books.isEmpty ? "まだ本がありません" : "この条件の本はありません"
+                        , systemImage: "books.vertical"
+                        , description: Text(books.isEmpty ? "下のカメラボタンから、最初の１冊を登録しよう！" : "別のタグを選ぶか、「すべて」に戻してください")
+                    )
+                } else {
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.flexible(), alignment: .top)
+                                            , GridItem(.flexible(), alignment: .top)
+                                            , GridItem(.flexible(), alignment: .top)]) {
+                            ForEach(filteredBooks) { book in
+                                NavigationLink {
+                                    BookDetailView(book: book)
+                                } label: {
+                                    VStack(alignment: .leading) {
+                                        
+                                        // 書影
+                                        BookCoverView(title: book.title, thumbnailURL: book.thumbnailURL)
+                                            .frame(width: 100, height: 150)
+                                        
+                                        // 書籍タイトル
+                                        Text(book.title)
+                                            .font(.caption) // キャプションモード
+                                            .lineLimit(2) // 最大2行に制限
+                                        
+                                        // ステータスバッジ(読みたい!や読了など)
+                                        StatusBadgeView(status: book.status)
+                                    }
+                                    .frame(maxWidth: 100, alignment: .leading)
                                     
-                                    // 書影
-                                    BookCoverView(title: book.title, thumbnailURL: book.thumbnailURL)
-                                        .frame(width: 100, height: 150)
-                                    
-                                    // 書籍タイトル
-                                    Text(book.title)
-                                        .font(.caption) // キャプションモード
-                                        .lineLimit(2) // 最大2行に制限
-                                    
-                                    // ステータスバッジ(読みたい!や読了など)
-                                    StatusBadgeView(status: book.status)
                                 }
-                                .frame(maxWidth: 100, alignment: .leading)
-                                
+                                .buttonStyle(.plain) // リンクの青文字化を防ぐ
                             }
-                            .buttonStyle(.plain) // リンクの青文字化を防ぐ
                         }
                     }
+                    .padding(.bottom, 20) // 本タブのための余白
                 }
-                .padding(.bottom, 20) // 本タブのための余白
                 
                 
                 Divider()

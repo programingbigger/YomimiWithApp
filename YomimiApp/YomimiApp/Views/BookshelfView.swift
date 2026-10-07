@@ -11,13 +11,23 @@ import SwiftData
 struct BookshelfView: View {
     
     @State var searchBookTitle: String = ""
-    
+    @State private var selectedStatus: ReadStatus? = nil // nilの場合は「すべて」となる
     @Query(sort: \BookRecord.createdAt, order: .reverse) private var books: [BookRecord]
+    
+    // 本に対するステータスで絞った場合と「すべて」の場合の分岐
+    private var filteredBooks: [BookRecord] {
+
+        if let status = selectedStatus {
+            return books.filter { $0.status == status }
+        } else {
+            return books
+        }
+    }
     
     var body: some View {
         NavigationStack {
             
-            Text("登録数: \(books.count)")
+            Text("登録数: \(filteredBooks.count)")
             
             VStack {
                 
@@ -32,10 +42,10 @@ struct BookshelfView: View {
                 
                 // タグ &　絞り込み
                 HStack() {
-                    Text("すべて")
-                    Text("未読5")
-                    Text("読中3")
-                    Text("読了4")
+                    Button("すべて") { selectedStatus = nil }
+                    ForEach(ReadStatus.allCases, id: \.self) { status in
+                        Button(status.label) { selectedStatus = status }
+                    }
                 }
                 
                 //ヒント
@@ -43,8 +53,10 @@ struct BookshelfView: View {
                 
                 // 本棚一覧
                 ScrollView {
-                    LazyVGrid(columns: [GridItem(), GridItem(), GridItem()]) {
-                        ForEach(books) { book in
+                    LazyVGrid(columns: [GridItem(.flexible(), alignment: .top)
+                                        , GridItem(.flexible(), alignment: .top)
+                                        , GridItem(.flexible(), alignment: .top)]) {
+                        ForEach(filteredBooks) { book in
                             NavigationLink {
                                 BookDetailView(book: book)
                             } label: {
@@ -62,6 +74,8 @@ struct BookshelfView: View {
                                     // ステータスバッジ(読みたい!や読了など)
                                     StatusBadgeView(status: book.status)
                                 }
+                                .frame(maxWidth: 100, alignment: .leading)
+                                
                             }
                             .buttonStyle(.plain) // リンクの青文字化を防ぐ
                         }

@@ -7,6 +7,36 @@
 
 import SwiftUI
 
+// 白いカード（小見出し + 中身）
+private struct DetailSection<Content: View>: View {
+    let title: String
+    let content: Content
+    
+    init(title: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(title)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundStyle(Color(.textSecondary))
+                .padding(.horizontal, 14)
+                .padding(.top, 10)
+                .padding(.bottom, 6)
+            content
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.appSurface))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.appBorder)))
+    }
+}
+
+// 白いカードの中にあるcontent
+// 書籍情報のカラム名 + 書籍から首藤した情報を載せる
 private struct DetailRow: View {
     
     let label: String
@@ -21,7 +51,7 @@ private struct DetailRow: View {
         HStack(alignment: .top) {
             Text(label)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color(.textSecondary))
                 .frame(width: 70, alignment: .leading)
             Text(displayValue)
                 .font(.body)
@@ -29,9 +59,19 @@ private struct DetailRow: View {
     }
 }
 
+// 詳細画面（本体）
 struct BookDetailView: View {
     
-    let book: BookRecord
+    // 書籍情報の読み取り
+    @Bindable var book: BookRecord
+    
+    // 感想を記載するメモ欄
+    private var memoBinding: Binding<String> {
+        Binding(
+            get: { book.memo ?? ""},
+            set: { book.memo = $0.isEmpty ? nil : $0 }
+        )
+    }
         
     var body: some View {
         
@@ -50,18 +90,34 @@ struct BookDetailView: View {
                     .multilineTextAlignment(.center)
                 StatusBadgeView(status: book.status)
                 
-                // 書籍情報
-                VStack(alignment: .leading, spacing: 12) {
-                    DetailRow(label: "著者", value: book.title)
-                    DetailRow(label: "出版社", value: book.publisher)
-                    DetailRow(label: "出版年月", value: book.publishedDate)
-                    DetailRow(label: "ページ数", value: book.pageCount.map { "\($0)ページ" })
-                    DetailRow(label: "ジャンル", value: book.genre)
+                // メモ
+                DetailSection(title: "📝 メモ（感想や思ったことを記録しよう！）") {
+                    TextEditor(text: memoBinding)
+                        .frame(minHeight: 120)
+                        .scrollContentBackground(.hidden)
+                        .padding(.horizontal, 10)
+                        .padding(.bottom, 8)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-                .background(Color(.appSurface))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                
+                // おすすめ度
+                DetailSection(title: "読書記録") {
+                    StarRatingView(rating: $book.rating)
+                        .padding(.horizontal, 10)
+                        .padding(.bottom, 8)
+                }
+                
+                // 書籍情報
+                DetailSection(title: "書籍情報") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        DetailRow(label: "著者", value: book.author)
+                        DetailRow(label: "出版社", value: book.publisher)
+                        DetailRow(label: "出版年月", value: book.publishedDate)
+                        DetailRow(label: "ページ数", value: book.pageCount.map { "\($0)ページ" })
+                        DetailRow(label: "ジャンル", value: book.genre)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 12)
+                }
             }
             .padding()
         }

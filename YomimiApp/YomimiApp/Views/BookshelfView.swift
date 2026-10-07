@@ -49,7 +49,7 @@ struct BookshelfView: View {
                                 BookDetailView(book: book)
                             } label: {
                                 VStack(alignment: .leading) {
-                                    Capsule()
+                                    BookCoverView(title: book.title, thumbnailURL: book.thumbnailURL)
                                         .frame(width: 100, height: 150)
                                     Text(book.title)
                                         .font(.caption) // キャプションモード

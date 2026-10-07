@@ -61,7 +61,7 @@ struct OpenBDService: BookAPIService {
             author: summary.author,
             publisher: summary.publisher,
             pubdate: summary.pubdate,
-            coverURL: summary.cover
+            coverURL: summary.cover.flatMap { $0.isEmpty ? nil: $0 } // 空の場合はnilで統一。それ以外は表示
         )
     }
 }

@@ -44,7 +44,7 @@ private struct DetailRow: View {
     let value: String?
     
     private var displayValue: String {
-        guard let value, !value.isEmpty else { return "ー" }
+        guard let value, !value.isEmpty else { return "ー" } // nilまたは空文字のとき"ー"
         return value
     }
     
@@ -60,6 +60,28 @@ private struct DetailRow: View {
     }
 }
 
+// 編集できる行（右に✏️マーク）
+//private struct EditableRow: View {
+//    let label: String
+//    @Binding var text: String
+//    var keyboard: UIKeyboardType = .default
+//    
+//    var body: some View {
+//        HStack(alignment:.top) {
+//            Text(label)
+//                .font(.caption)
+//                .foregroundStyle(Color(.textSecondary))
+//                .frame(width: 70, alignment: .leading)
+//            Image(systemName: "pencil")
+//                .font(.caption)
+//                .foregroundStyle(Color(.textTertiary))
+//            TextField("未入力", text: $text)
+//                .font(.body)
+//                .keyboardType(keyboard)
+//        }
+//    }
+//}
+
 // 詳細画面（本体）
 struct BookDetailView: View {
     
@@ -67,8 +89,12 @@ struct BookDetailView: View {
     let book: BookRecord
     
     // 編集中の下書き（「完了」を押下するまで、bookに書き込まない）
-    @State private var draftMemo: String
+    @State private var draftMemo: String // TextEditorはBinding<String>のため、オプショナル型はつけない（以下同じ）
     @State private var draftRating: Int?
+//    @State private var draftTitle: String
+//    @State private var draftAuthor: String // 著者の編集は様子を見て判断。運用や色々な人に聞いてみて、著者名をわざわざ変えたくなるのか？で様子見
+//    @State private var draftGenre: String
+//    @State private var draftPageCount: String // 保存時にIntに変換する
     
     @Environment(\.modelContext) private var modelContext // 保存の窓口
     @Environment(\.dismiss) private var dismiss // 画面を閉じる操作
@@ -80,11 +106,20 @@ struct BookDetailView: View {
         self.book = book
         _draftMemo = State(initialValue: book.memo ?? "")
         _draftRating = State(initialValue: book.rating)
+//        _draftTitle = State(initialValue: book.title)
+//        _draftAuthor = State(initialValue: book.author)
+//        _draftGenre = State(initialValue: book.genre ?? "")
+//        _draftPageCount = State(initialValue: book.pageCount.map(String.init) ?? "")
     }
     
-    // メモとおすすめ度が元の値から変わっているか？の判定
+    // 編集があったことを検知する
     private var hasChanges: Bool {
-        draftMemo != (book.memo ?? "") || draftRating != book.rating
+        draftMemo != (book.memo ?? "")
+        || draftRating != book.rating
+//        || _draftTitle != book.title
+//        || draftAuthor != book.author
+//        || _draftGenre != (book.genre ?? "")
+//        || _draftPageCount != (book.pageCount.map(String.init) ?? "")
     }
     
     // 感想を記載するメモ欄
@@ -101,7 +136,7 @@ struct BookDetailView: View {
             VStack(spacing: 16) {
                 
                 // 表紙・タイトル・ステータス
-                BookCoverView(title:  book.title
+                BookCoverView(title: book.title
                               , thumbnailURL: book.thumbnailURL
                               , width: 150
                               , height: 225
@@ -132,6 +167,7 @@ struct BookDetailView: View {
                 DetailSection(title: "書籍情報") {
                     VStack(alignment: .leading, spacing: 12) {
                         DetailRow(label: "著者", value: book.author)
+//                        EditableRow(label: "著者", text: $draftAuthor) // へインフォーメーションとして、「〜様や愛称など」といった好きな名前への変更ができる旨を後々記載する
                         DetailRow(label: "出版社", value: book.publisher)
                         DetailRow(label: "出版年月", value: book.publishedDate)
                         DetailRow(label: "ページ数", value: book.pageCount.map { "\($0)ページ" })
@@ -174,13 +210,11 @@ struct BookDetailView: View {
     
     // 完了：下書きをbookに描き戻して保存する
     private func save() {
-        if draftMemo.isEmpty {
-            book.memo = nil
-        } else {
-            book.memo = draftMemo
-        }
+//        book.author = draftAuthor
+        book.memo = draftMemo.isEmpty ? nil : draftMemo
         book.rating = draftRating
         book.updatedAt = .now // 更新日
+        
         do {
             try modelContext.save()
             dismiss()

@@ -8,6 +8,7 @@
 import Foundation
 
 // 1 OpenBD側のみから受け取る型
+//Decodableはプロトコル
 private struct OpenBDSummary: Decodable {
     let isbn: String?
     let title: String?

@@ -22,6 +22,7 @@ DerivedData/
 *.ipa
 *.xcarchive
 *.xcresult
+Secrets.xcconfig
 
 # Swift Package Manager
 .build/

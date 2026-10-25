@@ -59,7 +59,6 @@ struct BookRegistrationView: View {
         _author = State(initialValue:  mode.summary?.author ?? "")
         _publisher = State(initialValue:  mode.summary?.publisher ?? "")
         _publishedDate = State(initialValue:  mode.summary?.pubdate ?? "")
-        
     }
     
     
@@ -93,8 +92,7 @@ struct BookRegistrationView: View {
                     
                     // 本の表紙など
                     HStack() {
-                        Capsule()
-                            .frame(width: 100, height: 150)
+                        BookCoverView(title: title, thumbnailURL: mode.summary?.coverURL, width: 100, height: 150)
                         
                         VStack(alignment: .leading) {
                             Text("本のタイトル")

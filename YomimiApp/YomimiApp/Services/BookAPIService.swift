@@ -14,29 +14,14 @@ protocol BookAPIService {
     func fetchBookInfo(isbn: String) async throws -> BookAPISummary
 }
 
-// 2　共通で使うエラーの種類
+// 2　共通で使うエラーの種類（Errorはプロトコル）
 enum BookAPIError: Error {
-    case invalidURL
-    case notFound
+    case invalidURL // URL系（URL の文字列が作れない / URLの情報不備）
+    case notAppToken // 合言葉不備
+    case notFound // 本が見つからなかったとき
+    case notConnected // 通信系（圏外 / 機内モード）
+    case timeOut // タイムアウト
+    case serverError // 5xx系
+    case notMatchType // 予期していない型
+    case unknown // 予期していない
 }
-
-/*
- ④今後の切り替え候補（今は実装しない、設計イメージだけ置いておく）
- 
- // Google Books APIを使う場合
- struct GoogleBooksService: BookAPIService {
- func fetchBookInfo(isbn: String) async throws -> BookSummary {
- // let url = URL(string: "https://www.googleapis.com/books/v1/volumes?q=isbn:\(isbn)")
- // ...Google Books特有のJSON形式をBookSummaryに変換する処理...
- }
- }
- 
- // 楽天ブックスAPIを使う場合
- struct RakutenBooksService: BookAPIService {
- let applicationId: String
- func fetchBookInfo(isbn: String) async throws -> BookSummary {
- // let url = URL(string: "https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&isbn=\(isbn)&applicationId=\(applicationId)")
- // ...楽天特有のJSON形式をBookSummaryに変換する処理...
- }
- }
- */

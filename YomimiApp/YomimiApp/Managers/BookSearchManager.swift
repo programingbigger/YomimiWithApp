@@ -20,7 +20,8 @@ import Foundation
 class BookSearchManager {
     
     // どのAPIを使うかは、この1行だけで決定する
-    private let bookAPIServices: BookAPIService = OpenBDService()
+//    private let bookAPIServices: BookAPIService = OpenBDService()
+    private let bookAPIServices: BookAPIService = RakutenAPIService()
     
     // 画面に見せる状態
     var scannedISBN: String?        // 読み取ったISBN

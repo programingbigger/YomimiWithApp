@@ -48,7 +48,7 @@ final class BookRecord {
         id: UUID = UUID(),
         isbn: String? = nil,
         title: String, // titleは必須だから、このクラスを呼び出すための必要条件 ⇨ 値を必ず入れる設定にさせる
-        author: String = "",
+        author: String = "", // 初期値はnilではなく、空文字が入る
         publisher: String? = nil,
         publishedDate: String? = nil,
         genre: String? = nil,

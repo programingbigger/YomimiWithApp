@@ -20,8 +20,8 @@ import Foundation
 class BookSearchManager {
     
     // どのAPIを使うかは、この1行だけで決定する
-//    private let bookAPIServices: BookAPIService = OpenBDService()
-    private let bookAPIServices: BookAPIService = RakutenAPIService()
+    private let OpenBDAPIServices: BookAPIService = OpenBDService()
+    private let RakutenAPIServices: BookAPIService = RakutenAPIService()
     
     // 画面に見せる状態
     var scannedISBN: String?        // 読み取ったISBN
@@ -44,11 +44,51 @@ class BookSearchManager {
         isLoading = true
         
         do {
-            BookAPISummary = try await bookAPIServices.fetchBookInfo(isbn: isbn)
-        } catch BookAPIError.notFound {
-            errorMessage = "この本は見つかりませんでした"
+            #if DEBUG
+            print("🟣 [BookSearchManager] 楽天BookAPIを叩く")
+            #endif
+            BookAPISummary = try await RakutenAPIServices.fetchBookInfo(isbn: isbn)
+        } catch let error as BookAPIError {
+            switch error {
+            case .notConnected:
+                errorMessage = "インターネットに接続されていません"
+            case .timeOut:
+                errorMessage = "タイムアウト"
+            case .notFound, .notMatchType, .notAppToken, .invalidURL, .serverError, .unknown:
+                #if DEBUG
+                print("🟣 [BookSearchManager] 楽天で本が見つからなかったため、BookBDAPIを叩く")
+                #endif
+                
+                do {
+                    BookAPISummary = try await OpenBDAPIServices.fetchBookInfo(isbn: isbn)
+                } catch let error as BookAPIError {
+                    switch error {
+                    case .invalidURL:
+                        errorMessage = "この本は見つかりませんでした"
+                    case .notFound:
+                        errorMessage = "この本は見つかりませんでした"
+                    default:
+                        errorMessage = "この本は見つかりませんでした"
+                    }
+                } catch {
+                    errorMessage = "この本は見つかりませんでした"
+                }
+            }
         } catch {
-            errorMessage = "取得に失敗しました: \(error), isbnコード: \(isbn)"
+            do {
+                BookAPISummary = try await OpenBDAPIServices.fetchBookInfo(isbn: isbn)
+            } catch let error as BookAPIError {
+                switch error {
+                case .invalidURL:
+                    errorMessage = "この本は見つかりませんでした"
+                case .notFound:
+                    errorMessage = "この本は見つかりませんでした"
+                default:
+                    errorMessage = "この本は見つかりませんでした"
+                }
+            } catch {
+                errorMessage = "この本は見つかりませんでした"
+            }
         }
         
         // 検索終了
@@ -57,5 +97,8 @@ class BookSearchManager {
         print("🟣 [BookSearchManager] 検索終了")
         #endif
     }
+    
+    // 予備のOpenBDAPIを叩く処理
+    
 }
 

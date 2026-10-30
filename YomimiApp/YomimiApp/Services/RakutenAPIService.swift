@@ -28,6 +28,9 @@ private struct RakutenAPIImte: Decodable {
     let Item: RakutenAPISummary?
 }
 
+//private struct RakutenAPIResponse: Decodable {
+//    let Items: [RakutenAPIImte]
+//}
 private struct RakutenAPIResponse: Decodable {
     let Items: [RakutenAPIImte]
 }
@@ -55,7 +58,7 @@ struct RakutenAPIService: BookAPIService {
         */
         // リクエスト前準備
         guard let url = URL(string: "https://yomimi.shidiannaigong.workers.dev/book?isbn=\(isbn)") else {
-            #if DEBUG
+        #if DEBUG
             print("🌐 [RakutenAPIService] urlのインスタン化に失敗")
             #endif
             throw BookAPIError.invalidURL
@@ -128,7 +131,8 @@ struct RakutenAPIService: BookAPIService {
              addにしなかったのは、間違って同じフィールドのaddValueを2回行わないため。行うと文字列が連結されてしまう。
          */
         
-        guard let httpResponse = response as? HTTPURLResponse else {{x            #if DEBUG
+        guard let httpResponse = response as? HTTPURLResponse else {
+            #if DEBUG
             print("🌐 [RakutenAPIService] httpレスポンス取得に失敗。見知らぬエラー")
             #endif
             throw BookAPIError.unknown

@@ -59,7 +59,7 @@ struct RakutenAPIService: BookAPIService {
         // リクエスト前準備
         guard let url = URL(string: "https://yomimi.shidiannaigong.workers.dev/book?isbn=\(isbn)") else {
         #if DEBUG
-            print("🌐 [RakutenAPIService] urlのインスタン化に失敗")
+            print("🟥 [RakutenAPIService] urlのインスタン化に失敗")
             #endif
             throw BookAPIError.invalidURL
         }
@@ -79,31 +79,31 @@ struct RakutenAPIService: BookAPIService {
             (data, response) = try await URLSession.shared.data(for: request)
         } catch let error as URLError {
             #if DEBUG
-            print("🌐 [RakutenAPIService] リクエスト失敗。URLError発生")
+            print("🟥 [RakutenAPIService] リクエスト失敗。URLError発生")
 
             #endif
             
             switch error.code {
             case .notConnectedToInternet:
                 #if DEBUG
-                print("🌐 [RakutenAPIService] 接続できなかった（圏外 / 機内モード） エラーコードを取得: \(error.code)")
+                print("🟥 [RakutenAPIService] 接続できなかった（圏外 / 機内モード） エラーコードを取得: \(error.code)")
                 #endif
                 throw BookAPIError.notConnected
             case .timedOut:
                 #if DEBUG
-                print("🌐 [RakutenAPIService] タイムアウト エラーコードを取得: \(error.code)")
+                print("🟥 [RakutenAPIService] タイムアウト エラーコードを取得: \(error.code)")
                 #endif
                 throw BookAPIError.timeOut // タイムアウトエラー
             default:
                 #if DEBUG
-                print("🌐 [RakutenAPIService] 見知らぬエラーコードを取得: \(error.code)")
+                print("🟥 [RakutenAPIService] 見知らぬエラーコードを取得: \(error.code)")
                 #endif
                 throw BookAPIError.unknown // それ以外はunknownとして処理
             }
         } catch {
             #if DEBUG
-            print("🌐 [RakutenAPIService] エラーコード以外のエラーが発生")
-            print("🌐 [RakutenAPIService] エラー: \(error)")
+            print("🟥 [RakutenAPIService] エラーコード以外のエラーが発生")
+            print("🟥 [RakutenAPIService] エラー: \(error)")
             #endif
             throw BookAPIError.unknown // それ以外
         }
@@ -133,7 +133,7 @@ struct RakutenAPIService: BookAPIService {
         
         guard let httpResponse = response as? HTTPURLResponse else {
             #if DEBUG
-            print("🌐 [RakutenAPIService] httpレスポンス取得に失敗。見知らぬエラー")
+            print("🟥 [RakutenAPIService] httpレスポンス取得に失敗。見知らぬエラー")
             #endif
             throw BookAPIError.unknown
         }
@@ -146,33 +146,33 @@ struct RakutenAPIService: BookAPIService {
                     decoda = try JSONDecoder().decode(RakutenAPIResponse.self, from: data)
                 } catch let decodaError as DecodingError {
                     #if DEBUG
-                    print("🌐 [RakutenAPIService] デコーダ失敗。APIの仕様変更の可能性あり: \(decodaError)")
+                    print("🟥 [RakutenAPIService] デコーダ失敗。APIの仕様変更の可能性あり: \(decodaError)")
                     #endif
                     throw BookAPIError.notMatchType
                 } catch {
                     #if DEBUG
-                    print("🌐 [RakutenAPIService] デコーダ失敗。見知らぬエラー")
+                    print("🟥 [RakutenAPIService] デコーダ失敗。見知らぬエラー")
                     #endif
                     throw BookAPIError.unknown
                 }
             case 401:
                 #if DEBUG
-                print("🌐 [RakutenAPIService] ステータスコード 401: 合言葉不備")
+                print("🟥 [RakutenAPIService] ステータスコード 401: 合言葉不備")
                 #endif
                 throw BookAPIError.notAppToken
             case 404:
                 #if DEBUG
-                print("🌐 [RakutenAPIService] ステータスコード 404: URL系（URLの情報不備）")
+                print("🟥 [RakutenAPIService] ステータスコード 404: URL系（URLの情報不備）")
                 #endif
                 throw BookAPIError.invalidURL
             case 500...599:
                 #if DEBUG
-                print("🌐 [RakutenAPIService] ステータスコード 5xx: サーバーエラー")
+                print("🟥 [RakutenAPIService] ステータスコード 5xx: サーバーエラー")
                 #endif
                 throw BookAPIError.serverError
             default:
                 #if DEBUG
-                print("🌐 [RakutenAPIService] 見知らぬステータスコード \(httpResponse.statusCode)")
+                print("🟥 [RakutenAPIService] 見知らぬステータスコード \(httpResponse.statusCode)")
                 #endif
                 throw BookAPIError.unknown
         }
@@ -180,7 +180,7 @@ struct RakutenAPIService: BookAPIService {
         guard !decoda.Items.isEmpty else {
             // 結果「空」だった
             #if DEBUG
-            print("🌐 [RakutenAPIService] 200系で成功 & 結果「空」だった")
+            print("🟨 [RakutenAPIService] 200系で成功 & 結果「空」だった")
             #endif
             throw BookAPIError.notFound
         }
@@ -190,13 +190,13 @@ struct RakutenAPIService: BookAPIService {
               let item = first.Item else {
             // 結果 nilだった
             #if DEBUG
-            print("🌐 [RakutenAPIService] 200系で成功 & 結果 nilだった")
+            print("🟨 [RakutenAPIService] 200系で成功 & 結果 nilだった")
             #endif
             throw BookAPIError.notFound
         }
         
         #if DEBUG
-        print("🌐 [RakutenAPIService] 取得成功！ヒットした！")
+        print("🟩 [RakutenAPIService] 取得成功！ヒットした！")
         #endif
         
         return BookAPISummary(

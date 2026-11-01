@@ -12,6 +12,11 @@
  ・結果を画面が使いやすい状態（読み込み中 / 成功 / error）にして持つ
  
  Services/ ⇨ Managers/⭐️ ⇨ Views/
+ 
+ # 補足
+ ここで出力されるerrorMessageは、単にテスト画面用のエラーメッセージ。
+ 本番にする際は、ここの思想設計から始める必要があることに注意。
+ 
  */
 
 import Foundation
@@ -47,7 +52,7 @@ class BookSearchManager {
             #if DEBUG
             print("🟣 [BookSearchManager] 楽天BookAPIを叩く")
             #endif
-            BookAPISummary = try await RakutenAPIServices.fetchBookInfo(isbn: isbn)
+            BookAPISummary = try await RakutenAPIServices.fetchBookInfo(isbn: isbn) // 楽天API
         } catch let error as BookAPIError {
             switch error {
             case .notConnected:
@@ -56,39 +61,12 @@ class BookSearchManager {
                 errorMessage = "タイムアウト"
             case .notFound, .notMatchType, .notAppToken, .invalidURL, .serverError, .unknown:
                 #if DEBUG
-                print("🟣 [BookSearchManager] 楽天で本が見つからなかったため、BookBDAPIを叩く")
+                print("🟣 [BookSearchManager] 楽天で本が見つからなかった エラー：\(error)")
                 #endif
-                
-                do {
-                    BookAPISummary = try await OpenBDAPIServices.fetchBookInfo(isbn: isbn)
-                } catch let error as BookAPIError {
-                    switch error {
-                    case .invalidURL:
-                        errorMessage = "この本は見つかりませんでした"
-                    case .notFound:
-                        errorMessage = "この本は見つかりませんでした"
-                    default:
-                        errorMessage = "この本は見つかりませんでした"
-                    }
-                } catch {
-                    errorMessage = "この本は見つかりませんでした"
-                }
+                await callOpenBDAPI(isbn: isbn)
             }
         } catch {
-            do {
-                BookAPISummary = try await OpenBDAPIServices.fetchBookInfo(isbn: isbn)
-            } catch let error as BookAPIError {
-                switch error {
-                case .invalidURL:
-                    errorMessage = "この本は見つかりませんでした"
-                case .notFound:
-                    errorMessage = "この本は見つかりませんでした"
-                default:
-                    errorMessage = "この本は見つかりませんでした"
-                }
-            } catch {
-                errorMessage = "この本は見つかりませんでした"
-            }
+            await callOpenBDAPI(isbn: isbn)
         }
         
         // 検索終了
@@ -99,6 +77,42 @@ class BookSearchManager {
     }
     
     // 予備のOpenBDAPIを叩く処理
+    /*
+    # 概要
+     OpenBDServiceを呼ぶ。
+     OpenBDAPIを叩く処理と、それに応じた結果 or エラーが返ってくる
+    
+    # 入力
+     isbn：String型
+     
+    # 出力
+     ・成功：BookAPISummary
+     ・失敗：エラーに応じたerrorMessage
+     
+    */
+    private func callOpenBDAPI(isbn: String) async {
+        #if DEBUG
+        print("🟣 [BookSearchManager] 楽天で本が見つからなかったため、BookBDAPIを叩く")
+        #endif
+        
+        do {
+            BookAPISummary = try await OpenBDAPIServices.fetchBookInfo(isbn: isbn)
+        } catch let error as BookAPIError {
+            #if DEBUG
+            print("🟣 [BookSearchManager] OpenBDでエラーが起きた エラー：\(error)")
+            #endif
+            switch error {
+            case .invalidURL:
+                errorMessage = "この本は見つかりませんでした"
+            case .notFound:
+                errorMessage = "この本は見つかりませんでした"
+            default:
+                errorMessage = "この本は見つかりませんでした"
+            }
+        } catch {
+            errorMessage = "この本は見つかりませんでした"
+        }
+    }
     
 }
 

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yomimi モック v3 案4 名刺の枠へ飛ぶ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ===== 色：Assets.xcassets/Color の値（ライト）をそのまま ===== */
+  :root {
+    --bg: #F7F4EF;            /* AppBackground */
+    --surface: #FFFFFF;       /* AppSurface */
+    --border: #E7E2DC;        /* AppBorder */
+    --text-primary: #1C1917;  /* TextPrimary */
+    --text-secondary: #78716C;/* TextSecondary */
+    --text-tertiary: #A8A29E; /* TextTertiary */
+    --accent: #8B5E3C;        /* AccentPrimary / AccentColor */
+    --accent-mid: #C49A6A;    /* AccentMid */
+    --accent-light: #F0E6DA;  /* AccentLight */
+    --tab-inactive: #B8AFA7;  /* TabInactive */
+    --st-done: #4A7C59;       /* StatusDone */
+    --st-reading: #3B6EA5;    /* StatusReading */
+    --st-unread: #9E9189;     /* StatusUnread（積読） */
+    --st-toread: #8E6BB0;     /* StatusToread（読みたい！） */
+  }
+
+  body {
+    background: #E8E3DC;
+    font-family: 'Noto Sans JP', -apple-system, sans-serif;
+    color: var(--text-primary);
+    padding: 40px 24px 80px;
+  }
+
+  /* ===== ページ見出し ===== */
+  .page-head { max-width: 1180px; margin: 0 auto 28px; }
+  .eyebrow { font-size: 11px; letter-spacing: .12em; color: #7D6E62; font-weight: 500; }
+  .page-head h1 { font-family: 'Noto Serif JP', serif; font-size: 26px; margin: 6px 0 8px; }
+  .page-head .lead { font-size: 14px; color: #5C5048; line-height: 1.8; max-width: 760px; }
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0 6px; }
+  .flow .step { background: rgba(255,255,255,.75); border: 1px solid #D9D0C6; border-radius: 10px; padding: 8px 12px; font-size: 12.5px; line-height: 1.5; }
+  .flow .step b { color: var(--accent); }
+  .flow .arrow { color: #A8998C; font-size: 14px; }
+  .flow .total { background: var(--accent); color: #fff; border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 700; }
+  .other-link { font-size: 12.5px; color: #7D6E62; margin-top: 10px; }
+  .other-link a { color: var(--accent); font-weight: 500; }
+
+  /* ===== 画面ならび ===== */
+  .row { display: flex; flex-wrap: wrap; gap: 44px 40px; justify-content: center; max-width: 1600px; margin: 0 auto; }
+  .screen-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .screen-label { font-size: 11px; font-weight: 500; color: #7D6E62; letter-spacing: .06em; background: rgba(255,255,255,.65); padding: 4px 12px; border-radius: 20px; }
+  .screen-label.live { background: var(--accent); color: #fff; }
+  .screen-sublabel { font-size: 10.5px; color: #8E7F73; background: rgba(255,255,255,.45); padding: 3px 10px; border-radius: 12px; margin-top: -4px; max-width: 340px; text-align: center; line-height: 1.5; }
+  .tapbox { display: flex; gap: 10px; align-items: center; font-size: 12px; color: #5C5048; }
+  .tapbox b { font-size: 18px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .tapbox button { font: inherit; font-size: 11.5px; border: 1px solid #CFC5BA; background: #fff; border-radius: 8px; padding: 4px 10px; cursor: pointer; color: #5C5048; }
+
+  /* ===== iPhone フレーム ===== */
+  .phone {
+    width: 340px; height: 720px; background: var(--bg); border-radius: 48px; overflow: hidden; position: relative;
+    box-shadow: 0 0 0 8px #2A2420, 0 0 0 10px #3D3530, 0 32px 64px rgba(0,0,0,.32);
+    display: flex; flex-direction: column; isolation: isolate;
+  }
+  .island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 104px; height: 30px; background: #111; border-radius: 20px; z-index: 50; }
+  .statusbar { height: 50px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 6px; font-size: 13px; font-weight: 700; }
+  .statusbar .icons { font-size: 10px; letter-spacing: 1px; }
+  .main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+  .nav { height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; border-bottom: 1px solid var(--border); position: relative; }
+  .content { flex: 1; overflow-y: auto; scrollbar-width: none; min-height: 0; }
+  .content::-webkit-scrollbar { display: none; }
+
+  /* ===== タブバー（HomeView：5つ＋中央に浮くカメラ） ===== */
+  .tabbar { height: 82px; flex-shrink: 0; display: flex; border-top: 1px solid var(--border); background: rgba(247,244,239,.96); padding-top: 6px; position: relative; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--tab-inactive); }
+  .tab .ic { font-size: 22px; line-height: 1; filter: grayscale(1); opacity: .5; }
+  .tab.active { color: var(--accent); }
+  .tab.active .ic { filter: none; opacity: 1; }
+  .camera { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); width: 60px; height: 60px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  .home-ind { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; border-radius: 3px; background: #1C1917; opacity: .85; z-index: 60; }
+
+  /* ===== 共通部品：検索・チップ・バッジ・表紙 ===== */
+  .search { margin: 12px 16px 6px; background: var(--surface); border-radius: 16px; padding: 0 14px; display: flex; align-items: center; gap: 6px; height: 44px; }
+  .search input { border: none; outline: none; background: transparent; font: inherit; font-size: 14px; flex: 1; color: var(--text-primary); min-width: 0; }
+  .search input::placeholder { color: var(--text-tertiary); }
+  .chips { display: flex; gap: 8px; padding: 6px 16px 8px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { border: none; font: inherit; font-size: 12px; padding: 6px 10px; border-radius: 999px; background: var(--surface); color: var(--text-primary); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; cursor: pointer; }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .chip.on { background: var(--accent); color: #fff; }
+  .hint { font-size: 12.5px; text-align: center; padding: 2px 12px 8px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; padding: 3px 8px; border-radius: 999px; }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  .cover {
+    container-type: inline-size; width: 100%; aspect-ratio: 2/3; border-radius: 6px; overflow: hidden; position: relative;
+    display: flex; flex-direction: column; justify-content: space-between; padding: 10% 8%; color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.14);
+  }
+  .cover::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5%; background: rgba(0,0,0,.12); }
+  .cover .ct { font-family: 'Noto Serif JP', serif; font-weight: 700; font-size: 13cqw; line-height: 1.35; word-break: break-all; }
+  .cover .ca { font-size: 9cqw; opacity: .85; text-align: right; }
+  .cover.ph { background: var(--surface); border: 1px solid rgba(120,113,108,.3); color: var(--text-secondary); justify-content: center; align-items: center; text-align: center; box-shadow: none; }
+  .cover.ph::after { display: none; }
+  .cover.ph .ct { font-family: inherit; font-weight: 400; font-size: 12cqw; }
+
+  /* ===== S-01 本棚 ===== */
+  .shelf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 12px; padding: 4px 16px 20px; align-items: start; }
+  .shelf-item { display: flex; flex-direction: column; gap: 5px; }
+  .shelf-item .tt { font-size: 11.5px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
+  .empty-state .big { font-size: 34px; }
+
+  /* ===== S-06 名刺 ===== */
+  .card { margin: 14px 16px 18px; background: var(--surface); border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 14px 14px 16px; }
+  .seg { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; gap: 3px; }
+  .seg button { flex: 1; border: none; font: inherit; font-size: 11px; padding: 6px 4px; border-radius: 8px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+  .seg button.on { background: var(--surface); color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .count { display: flex; align-items: center; justify-content: space-between; margin: 12px 2px 8px; font-size: 13px; }
+  .count b { color: var(--accent); font-size: 17px; }
+  .pips { display: flex; gap: 3px; }
+  .pips i { width: 9px; height: 9px; border-radius: 50%; background: var(--border); transition: background .25s, transform .25s; }
+  .pips i.on { background: var(--accent); }
+  .card-grid { display: grid; grid-template-columns: repeat(3, 56px); justify-content: center; gap: 10px 22px; }
+  .slot { width: 56px; position: relative; cursor: pointer; }
+  .slot.empty .box { width: 56px; aspect-ratio: 2/3; border-radius: 6px; border: 1.5px dashed #D6CDC3; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 16px; }
+  .slot.empty .box small { font-size: 9px; margin-top: 2px; }
+  .slot .n { position: absolute; top: -6px; left: -6px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; z-index: 2; }
+  .slot.fresh { animation: drop .45s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes drop { from { transform: translateY(-10px) scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+  .btn { display: block; width: 100%; border: none; font: inherit; font-size: 14px; font-weight: 700; padding: 15px; border-radius: 12px; cursor: pointer; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary:disabled { background: #D6CDC3; cursor: default; }
+  .btn.secondary { background: var(--accent-light); color: var(--accent); }
+  .btn + .btn { margin-top: 8px; }
+  .card-actions { margin-top: 16px; }
+  .link-reset { display: block; margin: 10px auto 0; border: none; background: none; font: inherit; font-size: 12px; color: var(--text-tertiary); cursor: pointer; text-decoration: underline; }
+  .card-note { font-size: 11px; color: var(--text-tertiary); text-align: center; margin: 2px 16px 16px; line-height: 1.6; }
+
+  /* ===== シート（本を選ぶ） ===== */
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,.28); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 20; }
+  .sheet { position: absolute; left: 0; right: 0; top: 54px; bottom: 0; background: var(--bg); border-radius: 14px 14px 0 0; z-index: 30; display: flex; flex-direction: column; transform: translateY(105%); transition: transform .38s cubic-bezier(.2,.9,.25,1); box-shadow: 0 -4px 20px rgba(0,0,0,.12); }
+  .phone.sheet-open .dim { opacity: 1; pointer-events: auto; }
+  .phone.sheet-open .sheet { transform: none; }
+  .phone.no-anim .sheet, .phone.no-anim .dim { transition: none; }
+  .grabber { width: 36px; height: 5px; border-radius: 3px; background: #D6CDC3; margin: 6px auto 0; flex-shrink: 0; }
+  .sheet-nav { height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; flex-shrink: 0; }
+  .sheet-nav b { font-size: 15px; }
+  .sheet-nav button { border: none; background: none; font: inherit; font-size: 14px; color: var(--accent); cursor: pointer; width: 76px; text-align: left; }
+  .sheet-nav span { width: 76px; }
+  .sheet .search { margin: 4px 16px 2px; height: 40px; }
+  .sheet-scroll { flex: 1; overflow-y: auto; scrollbar-width: none; min-height: 0; }
+  .sheet-scroll::-webkit-scrollbar { display: none; }
+  .pick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 12px; padding: 6px 16px 20px; align-items: start; }
+  .pick { border: none; background: none; font: inherit; text-align: left; display: flex; flex-direction: column; gap: 5px; cursor: pointer; color: inherit; -webkit-tap-highlight-color: transparent; }
+  .pick .cw { position: relative; border-radius: 8px; transition: transform .15s; }
+  .pick:active .cw { transform: scale(.96); }
+  .pick .ring { position: absolute; inset: -3px; border-radius: 9px; border: 3px solid var(--accent); opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .pick .num { position: absolute; top: -7px; right: -7px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,.25); transform: scale(0); transition: transform .25s cubic-bezier(.2,1.6,.4,1); z-index: 2; }
+  .pick .tt { font-size: 11.5px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .pick.sel .ring { opacity: 1; }
+  .pick.sel .num { transform: scale(1); }
+  .pick.full:not(.sel) { opacity: .4; }
+  .pick.shake .cw { animation: shake .35s; }
+  @keyframes shake { 20%,60% { transform: translateX(-4px); } 40%,80% { transform: translateX(4px); } }
+  /* 案4：トレイに入った本は、グリッド側では「抜けた跡」に */
+  .plan4 .pick.sel .cover { opacity: .28; filter: grayscale(.6); }
+  .plan4 .pick.sel .ring { border-style: dashed; border-width: 2px; }
+
+  .sheet-bottom { flex-shrink: 0; padding: 10px 16px 26px; background: rgba(247,244,239,.97); border-top: 1px solid var(--border); }
+  .sheet-bottom .count { margin: 0 2px 8px; }
+
+  /* ===== 案4：名刺トレイ ===== */
+  .tray { margin: 2px 16px 4px; background: var(--surface); border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.07); padding: 10px 12px 10px; flex-shrink: 0; }
+  .tray-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .tray-head b { color: var(--accent); font-size: 15px; }
+  .tray-grid { display: grid; grid-template-columns: repeat(5, 38px); justify-content: space-between; gap: 8px 0; }
+  .tslot { width: 38px; position: relative; cursor: pointer; }
+  .tslot .box { width: 38px; aspect-ratio: 2/3; border-radius: 5px; border: 1.5px dashed #D6CDC3; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #C9BFB4; font-weight: 700; }
+  .tslot.next .box { border-color: var(--accent-mid); color: var(--accent-mid); background: var(--accent-light); animation: breathe 1.6s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: scale(1.06); } }
+  .tslot .n { position: absolute; top: -5px; left: -5px; width: 15px; height: 15px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 8.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1.5px solid #fff; z-index: 2; }
+  .tslot.pending .cover, .tslot.pending .n { visibility: hidden; }
+  .tslot.land { animation: land .35s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes land { 0% { transform: scale(1.18); } 100% { transform: scale(1); } }
+  .tray-hint { font-size: 10px; color: var(--text-tertiary); text-align: center; margin-top: 7px; }
+  .flyer { position: fixed; z-index: 9999; pointer-events: none; transform-origin: 0 0; transition: transform .52s cubic-bezier(.3,.7,.2,1), box-shadow .52s; box-shadow: 0 14px 30px rgba(0,0,0,.35); border-radius: 6px; }
+
+  /* ===== トースト・アラート ===== */
+  .toast { position: absolute; left: 50%; bottom: 140px; transform: translate(-50%, 10px); background: rgba(28,25,23,.88); color: #fff; font-size: 12.5px; padding: 9px 14px; border-radius: 999px; opacity: 0; transition: opacity .2s, transform .2s; z-index: 80; white-space: nowrap; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .alert-wrap { position: absolute; inset: 0; background: rgba(0,0,0,.3); z-index: 90; display: none; align-items: center; justify-content: center; }
+  .alert-wrap.show { display: flex; }
+  .alert { width: 260px; background: rgba(250,248,245,.98); border-radius: 14px; text-align: center; overflow: hidden; }
+  .alert h4 { font-size: 15px; padding: 18px 16px 4px; }
+  .alert p { font-size: 12.5px; color: var(--text-secondary); padding: 0 16px 16px; line-height: 1.6; }
+  .alert .acts { display: flex; border-top: 1px solid #DDD6CE; }
+  .alert .acts button { flex: 1; border: none; background: none; font: inherit; font-size: 15px; padding: 11px; color: #0A63D6; cursor: pointer; }
+  .alert .acts button + button { border-left: 1px solid #DDD6CE; }
+  .alert .acts .destructive { color: #D93025; font-weight: 700; }
+
+  /* ===== 下の解説 ===== */
+  .notes { max-width: 1180px; margin: 56px auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  .note { background: rgba(255,255,255,.72); border: 1px solid #D9D0C6; border-radius: 14px; padding: 18px 20px; font-size: 13px; line-height: 1.8; color: #3E3530; }
+  .note h3 { font-family: 'Noto Serif JP', serif; font-size: 16px; margin-bottom: 8px; color: var(--text-primary); }
+  .note ul { padding-left: 1.2em; }
+  .note li + li { margin-top: 3px; }
+  .note code { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; background: #F0E9E1; padding: 1px 5px; border-radius: 4px; }
+  .note pre { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; background: #2A2420; color: #F0E6DA; padding: 12px 14px; border-radius: 10px; overflow-x: auto; line-height: 1.6; margin-top: 8px; }
+  .good { color: var(--st-done); font-weight: 700; }
+  .bad { color: #B45309; font-weight: 700; }
+</style>
+</head>
+<body class="plan4">
+
+<header class="page-head">
+  <div class="eyebrow">YOMIMI · MOCKUP v3 · F-07 名刺代わりの10冊 · S-06 本を選ぶ</div>
+  <h1>案4：選んだ表紙が、上の「名刺の枠」へ飛んでいく</h1>
+  <p class="lead">案2のシートの上に、名刺の空き枠を10個並べた「トレイ」を置いた案です。本をタップすると、その表紙が次の空き枠（光っている枠）へスッと飛んでいきます。トレイの本をタップすれば外せます。左端の iPhone は実際に触れます。</p>
+  <div class="flow"><div class="step"><b>1タップ</b><br>空き枠 or「本を選ぼう！」</div><span class="arrow">→</span><div class="step"><b>10タップ</b><br>本を選ぶ（絞り込みはそのまま）</div><span class="arrow">→</span><div class="step"><b>1タップ</b><br>「この10冊で名刺をつくる」</div><span class="arrow">＝</span><div class="total">合計 約12タップ（案2と同じ）</div></div>
+  <div class="other-link">比べる → <a href="mockup_ui_v3_numbertap2.html">案2：タップした順に番号がつく</a></div>
+</header>
+
+<section class="row" id="row"></section>
+
+<section class="notes">
+  
+  <div class="note">
+    <h3>案4 の良いところ・気になるところ</h3>
+    <ul>
+      <li><span class="good">良い</span>：タップのたびに名刺が埋まっていくのが見える。選ぶこと自体が楽しい</li>
+      <li><span class="good">良い</span>：スクロールしても、トレイは上に残るので「今どれを選んだか」がいつも見える</li>
+      <li><span class="good">良い</span>：外すときは、トレイから直接タップできる</li>
+      <li><span class="bad">気になる</span>：トレイの分だけ本の一覧が狭くなる（今のモックで一度に見えるのは約2段）</li>
+      <li><span class="bad">気になる</span>：飛ぶアニメーションの実装が少し難しい。案2より <b>+1〜2時間</b> くらい見ておきたい</li>
+      <li>トレイは 5×2、名刺は 3列×4行。並べ方は違うけど、番号の順番は同じ</li>
+    </ul>
+  </div>
+  <div class="note">
+    <h3>SwiftUI ではこう作る（案4）</h3>
+    <ul>
+      <li>案2のシートの一番上に、トレイ（<code>LazyVGrid</code> 5列）を足す</li>
+      <li>「飛ぶ」動きは <code>@Namespace</code> と <code>.matchedGeometryEffect(id: book.id, in: ns)</code>。グリッドとトレイで同じ id を付けて、選んだら置き場所を入れ替える</li>
+      <li>コツ：同じ id の表紙は、どちらか片方にだけ置く。選ばれた本のグリッド側は「抜けた跡」（薄い表紙＋点線）にすると自然</li>
+      <li>うまく動かないときの代わり：<code>.transition(.scale)</code> でトレイにポンと出すだけでも、ワクワク感はかなり出る</li>
+    </ul>
+<pre>@Namespace private var ns
+
+// トレイ側
+ForEach(selectedIDs, id: \.self) { id in
+    BookCoverView(...)
+        .matchedGeometryEffect(id: id, in: ns)
+}
+
+// グリッド側（同じ id はどちらか片方にだけ置く）
+if selectedIDs.contains(book.id) {
+    BookCoverView(...).opacity(0.28)   // 抜けた跡
+} else {
+    BookCoverView(...)
+        .matchedGeometryEffect(id: book.id, in: ns)
+}
+
+// タップ時
+withAnimation(.spring(duration: 0.5)) { toggle(book) }</pre>
+  </div>
+  <div class="note">
+    <h3>v2 から直したところ（今の実装に合わせた）</h3>
+    <ul>
+      <li>タブバーは「本棚／お楽しみ／📷／名刺／設定」の5つ。カメラは中央に浮く丸ボタン（<code>HomeView</code>）</li>
+      <li>本棚のステータスは表紙の点ではなく、タイトル下のバッジ（<code>StatusBadgeView</code>）。凡例は削除</li>
+      <li>チップは「すべて 18」の形。選択中は茶色、それ以外は白（<code>StatusFilterChip</code>）</li>
+      <li>ステータス名は「読みたい！」、並びは 読了→読中→積読→読みたい！（<code>ReadStatus</code>）</li>
+      <li>書影のない本は、タイトル入りの白いプレースホルダー（<code>BookCoverView</code>）</li>
+      <li>本棚のヒント行「💡読み終わったら…」を追加</li>
+      <li>名刺は 4列 → <b>3列×最大4行</b>。自己紹介文の欄はなくし、<b>タイトルの2択</b>に（F-07・2026-11-07 の方針）</li>
+      <li>色は Assets の値に統一（AccentMid は #C49A6A）</li>
+      <li>モックでは検索欄で実際に絞り込める。<b>今のアプリでは検索文字がまだ <code>filteredBooks</code> に入っていない</b>ので、実装時に接続が必要</li>
+    </ul>
+  </div>
+</section>
+
+<script>
+const PLAN = 4;
+
+/* ---------- データ（BookRecord の title / author / status / thumbnailURL のイメージ） ---------- */
+const STATUS = {
+  finished: { label: '読了',     color: '#4A7C59' },
+  reading:  { label: '読中',     color: '#3B6EA5' },
+  tsundoku: { label: '積読',     color: '#9E9189' },
+  toread:   { label: '読みたい！', color: '#8E6BB0' },
+};
+const STATUS_ORDER = ['finished', 'reading', 'tsundoku', 'toread']; // ReadStatus.allCases の順
+const GRAD = [
+  ['#2C3E6B','#4A6FA5'], ['#4A7C59','#7BAF6C'], ['#8B3A3A','#C46B6B'], ['#5B4A8B','#8B7ABF'],
+  ['#7C5A3A','#BF9060'], ['#3A6B7C','#6AAFBF'], ['#6B3A5B','#B06A9F'], ['#2C5B3A','#4A9F6B'],
+  ['#3D3D3D','#7A7A7A'], ['#A0522D','#D2915A'], ['#1F4E5F','#3E8A9F'], ['#6B5B2C','#A8955A'],
+];
+// c が null の本は「書影なし」→ プレースホルダー表示
+const BOOKS = [
+  { id: 1,  t: '夜のピクニック',           a: '恩田陸',       s: 'finished', c: 0 },
+  { id: 2,  t: '羊と鋼の森',               a: '宮下奈都',     s: 'finished', c: 1 },
+  { id: 3,  t: 'センスの哲学',             a: '千葉雅也',     s: 'reading',  c: 8 },
+  { id: 4,  t: 'アルジャーノンに花束を',   a: 'ダニエル・キイス', s: 'finished', c: 2 },
+  { id: 5,  t: '銀河鉄道の夜',             a: '宮沢賢治',     s: 'finished', c: 3 },
+  { id: 6,  t: 'クスノキの番人',           a: '東野圭吾',     s: 'tsundoku', c: 4 },
+  { id: 7,  t: '52ヘルツのクジラたち',     a: '町田そのこ',   s: 'finished', c: 5 },
+  { id: 8,  t: 'コンビニ人間',             a: '村田沙耶香',   s: 'finished', c: 6 },
+  { id: 9,  t: '成瀬は天下を取りにいく',   a: '宮島未奈',     s: 'reading',  c: 9 },
+  { id: 10, t: '博士の愛した数式',         a: '小川洋子',     s: 'finished', c: 7 },
+  { id: 11, t: 'ノルウェイの森',           a: '村上春樹',     s: 'tsundoku', c: null },
+  { id: 12, t: 'そして、バトンは渡された', a: '瀬尾まいこ',   s: 'finished', c: 10 },
+  { id: 13, t: '汝、星のごとく',           a: '凪良ゆう',     s: 'toread',   c: 11 },
+  { id: 14, t: 'かがみの孤城',             a: '辻村深月',     s: 'finished', c: 3 },
+  { id: 15, t: '火花',                     a: '又吉直樹',     s: 'tsundoku', c: null },
+  { id: 16, t: '舟を編む',                 a: '三浦しをん',   s: 'finished', c: 0 },
+  { id: 17, t: '蜜蜂と遠雷',               a: '恩田陸',       s: 'toread',   c: 2 },
+  { id: 18, t: '君たちはどう生きるか',     a: '吉野源三郎',   s: 'reading',  c: 5 },
+];
+const byId = Object.fromEntries(BOOKS.map(b => [b.id, b]));
+const MAX = 10;
+const TITLES = ['#名刺代わりの10冊', '#名刺代わりの小説10冊'];
+
+/* ---------- 小さな部品 ---------- */
+function coverHTML(b) {
+  if (b.c === null) return `<div class="cover ph"><span class="ct">${b.t}</span></div>`;
+  const [g1, g2] = GRAD[b.c];
+  return `<div class="cover" style="background:linear-gradient(160deg,${g1},${g2})"><span class="ct">${b.t}</span><span class="ca">${b.a}</span></div>`;
+}
+function badgeHTML(s) {
+  const st = STATUS[s];
+  return `<span class="badge" style="color:${st.color};background:${st.color}26"><span class="dot" style="background:${st.color}"></span>${st.label}</span>`;
+}
+function chipsHTML(selected) {
+  let h = `<button class="chip ${selected === null ? 'on' : ''}" data-chip="" data-tap>すべて ${BOOKS.length}</button>`;
+  for (const s of STATUS_ORDER) {
+    const n = BOOKS.filter(b => b.s === s).length;
+    h += `<button class="chip ${selected === s ? 'on' : ''}" data-chip="${s}" data-tap><span class="dot" style="background:${STATUS[s].color}"></span>${STATUS[s].label} ${n}</button>`;
+  }
+  return h;
+}
+function filterBooks(status, q) {
+  q = (q || '').trim();
+  return BOOKS.filter(b => (status === null || b.s === status) && (!q || b.t.includes(q) || b.a.includes(q)));
+}
+function pipsHTML(n) {
+  return `<span class="pips">${Array.from({ length: MAX }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
+}
+function emptyHTML(noFilterHit) {
+  return `<div class="empty-state" style="grid-column:1/-1"><div class="big">📚</div>${noFilterHit ? 'この条件の本はありません<br>別のタグを選ぶか、「すべて」に戻してください' : 'まだ本がありません'}</div>`;
+}
+
+/* ---------- 1台の iPhone を作る ---------- */
+function mountPhone(host, opts) {
+  const st = {
+    screen: opts.screen,               // 'shelf' | 'card'
+    sel: [...(opts.sel || [])],        // 名刺に反映済み（BusinessCardView の @State のイメージ。まだ保存しない）
+    draft: [],                         // シートの中で選んでいる途中（selectedIDs）
+    titleIdx: 0,
+    shelf: { status: null, q: '' },
+    sheet: { status: null, q: '' },
+    flying: new Set(),
+    fresh: new Set(),
+  };
+
+  host.innerHTML = `
+    <div class="phone ${PLAN === 4 ? 'plan4' : ''}">
+      <div class="island"></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">●●● 📶 🔋</span></div>
+      <div class="main"></div>
+      <div class="tabbar">
+        <div class="tab ${st.screen === 'shelf' ? 'active' : ''}"><span class="ic">📚</span>本棚</div>
+        <div class="tab"><span class="ic">🌳</span>お楽しみ</div>
+        <div class="tab"></div>
+        <div class="tab ${st.screen === 'card' ? 'active' : ''}"><span class="ic">🪪</span>名刺</div>
+        <div class="tab"><span class="ic">⚙️</span>設定</div>
+        <div class="camera">📷</div>
+      </div>
+      <div class="dim"></div>
+      <div class="sheet">
+        <div class="grabber"></div>
+        <div class="sheet-nav"><button data-act="cancel" data-tap>キャンセル</button><b>名刺の本を選ぶ</b><span></span></div>
+        ${PLAN === 4 ? '<div class="tray"></div>' : ''}
+        <div class="search"><span>🔍</span><input placeholder="タイトル・著者で検索"></div>
+        <div class="chips"></div>
+        <div class="sheet-scroll"><div class="pick-grid"></div></div>
+        <div class="sheet-bottom"></div>
+      </div>
+      <div class="toast"></div>
+      <div class="alert-wrap"><div class="alert">
+        <h4>選んだ本をリセットしますか？</h4>
+        <p>名刺の10冊がすべて外れます。</p>
+        <div class="acts"><button data-act="alert-cancel" data-tap>キャンセル</button><button class="destructive" data-act="alert-ok" data-tap>リセット</button></div>
+      </div></div>
+      <div class="home-ind"></div>
+    </div>`;
+
+  const phone = host.querySelector('.phone');
+  const main = phone.querySelector('.main');
+  const sheet = phone.querySelector('.sheet');
+  const tray = phone.querySelector('.tray');
+  const pickGrid = phone.querySelector('.pick-grid');
+  const sheetChips = sheet.querySelector('.chips');
+  const sheetInput = sheet.querySelector('input');
+  const sheetBottom = sheet.querySelector('.sheet-bottom');
+  const toastEl = phone.querySelector('.toast');
+  const alertEl = phone.querySelector('.alert-wrap');
+
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1600);
+  }
+
+  /* ----- S-01 本棚 ----- */
+  function renderShelf() {
+    main.innerHTML = `
+      <div class="nav">📚本棚</div>
+      <div class="content">
+        <div class="search"><span>🔍</span><input placeholder="タイトル・著者で検索"></div>
+        <div class="chips"></div>
+        <div class="hint">💡読み終わったら「読中」→本をタップ→ステータス変更</div>
+        <div class="shelf-grid"></div>
+      </div>`;
+    const input = main.querySelector('input');
+    const chips = main.querySelector('.chips');
+    const grid = main.querySelector('.shelf-grid');
+    const draw = () => {
+      chips.innerHTML = chipsHTML(st.shelf.status);
+      const list = filterBooks(st.shelf.status, st.shelf.q);
+      grid.innerHTML = list.length ? list.map(b => `
+        <div class="shelf-item">${coverHTML(b)}<div class="tt">${b.t}</div><div>${badgeHTML(b.s)}</div></div>`).join('') : emptyHTML(true);
+    };
+    input.addEventListener('input', () => { st.shelf.q = input.value; draw(); });
+    chips.addEventListener('click', e => {
+      const c = e.target.closest('[data-chip]'); if (!c) return;
+      st.shelf.status = c.dataset.chip || null; draw();
+    });
+    draw();
+  }
+
+  /* ----- S-06 名刺 ----- */
+  function renderCard() {
+    const n = st.sel.length;
+    let slots = '';
+    for (let i = 0; i < MAX; i++) {
+      const id = st.sel[i];
+      if (id) {
+        const fresh = st.fresh.has(id) ? 'fresh' : '';
+        slots += `<div class="slot ${fresh}" style="animation-delay:${i * 45}ms" data-act="open" data-tap><span class="n">${i + 1}</span>${coverHTML(byId[id])}</div>`;
+      } else {
+        slots += `<div class="slot empty" data-act="open" data-tap><div class="box">＋<small>${i + 1}</small></div></div>`;
+      }
+    }
+    st.fresh.clear();
+    main.innerHTML = `
+      <div class="nav">🪪名刺代わりの本10選</div>
+      <div class="content">
+        <div class="card">
+          <div class="seg">${TITLES.map((t, i) => `<button class="${i === st.titleIdx ? 'on' : ''}" data-title="${i}" data-tap>${t}</button>`).join('')}</div>
+          <div class="count"><span>10冊中 <b>${n}</b>冊を選択中</span>${pipsHTML(n)}</div>
+          <div class="card-grid">${slots}</div>
+          <div class="card-actions">
+            ${n === 0
+              ? `<button class="btn primary" data-act="open" data-tap>📚 名刺代わりの本を選ぼう！</button>`
+              : `<button class="btn primary" data-act="share" data-tap>画像を作ってシェア</button>
+                 <button class="btn secondary" data-act="open" data-tap>本を選び直す</button>
+                 <button class="link-reset" data-act="reset" data-tap>リセット</button>`}
+          </div>
+        </div>
+        <div class="card-note">${n === 0 ? '空いている枠をタップしても選べます' : '枠をタップすると、選び直しの画面が開きます'}</div>
+      </div>`;
+  }
+
+  function renderMain() { st.screen === 'shelf' ? renderShelf() : renderCard(); }
+
+  /* ----- シート：本を選ぶ ----- */
+  function renderPicks() {
+    sheetChips.innerHTML = chipsHTML(st.sheet.status);
+    const list = filterBooks(st.sheet.status, st.sheet.q);
+    pickGrid.innerHTML = list.length ? list.map(b => `
+      <button class="pick" data-pick="${b.id}" data-tap>
+        <div class="cw">${coverHTML(b)}<span class="ring"></span><span class="num"></span></div>
+        <div class="tt">${b.t}</div><div>${badgeHTML(b.s)}</div>
+      </button>`).join('') : emptyHTML(true);
+    updatePicks();
+  }
+  function updatePicks() {
+    const full = st.draft.length >= MAX;
+    pickGrid.querySelectorAll('.pick').forEach(el => {
+      const i = st.draft.indexOf(+el.dataset.pick);
+      el.classList.toggle('sel', i >= 0);
+      el.classList.toggle('full', full);
+      if (i >= 0) el.querySelector('.num').textContent = i + 1;
+    });
+    const n = st.draft.length;
+    sheetBottom.innerHTML = `
+      <div class="count"><span>10冊中 <b>${n}</b>冊を選択中</span>${pipsHTML(n)}</div>
+      <button class="btn primary" data-act="done" data-tap ${n === 0 ? 'disabled' : ''}>${n === 0 ? '本をタップして選んでね' : `この${n}冊で名刺をつくる`}</button>`;
+    if (PLAN === 4) renderTray();
+  }
+  function renderTray() {
+    const n = st.draft.length;
+    let h = '';
+    for (let i = 0; i < MAX; i++) {
+      const id = st.draft[i];
+      if (id) {
+        h += `<div class="tslot ${st.flying.has(id) ? 'pending' : ''}" data-slot="${i}" data-tray="${id}" data-tap><span class="n">${i + 1}</span>${coverHTML(byId[id])}</div>`;
+      } else {
+        h += `<div class="tslot ${i === n ? 'next' : ''}" data-slot="${i}"><div class="box">${i + 1}</div></div>`;
+      }
+    }
+    tray.innerHTML = `
+      <div class="tray-head"><span>あなたの名刺</span><span><b>${n}</b> / 10</span></div>
+      <div class="tray-grid">${h}</div>
+      <div class="tray-hint">${n ? '上の本をタップすると外せます' : '下の本をタップすると、ここに入ります'}</div>`;
+  }
+
+  function flyCover(fromEl, toEl, done) {
+    const r1 = fromEl.getBoundingClientRect();
+    const r2 = toEl.getBoundingClientRect();
+    const f = fromEl.cloneNode(true);
+    f.classList.add('flyer');
+    Object.assign(f.style, { left: r1.left + 'px', top: r1.top + 'px', width: r1.width + 'px', opacity: 1, filter: 'none' });
+    document.body.appendChild(f);
+    f.getBoundingClientRect(); // いったん位置を確定させてからアニメーション
+    const s = r2.width / r1.width;
+    f.style.transform = `translate(${r2.left - r1.left}px, ${r2.top - r1.top}px) scale(${s})`;
+    f.style.boxShadow = '0 2px 6px rgba(0,0,0,.2)';
+    let finished = false;
+    const end = () => { if (finished) return; finished = true; f.remove(); done(); };
+    f.addEventListener('transitionend', e => { if (e.propertyName === 'transform') end(); });
+    setTimeout(end, 700);
+  }
+
+  function togglePick(id, el) {
+    const i = st.draft.indexOf(id);
+    if (i >= 0) {                                   // 選択済み → 外す（後ろの番号が詰まる）
+      st.draft.splice(i, 1);
+      updatePicks();
+      return;
+    }
+    if (st.draft.length >= MAX) {                   // 11冊目は入れない
+      el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+      toast('選べるのは10冊までです');
+      return;
+    }
+    st.draft.push(id);
+    if (PLAN === 4) {
+      st.flying.add(id);
+      updatePicks();
+      const slot = tray.querySelector(`[data-tray="${id}"]`);
+      flyCover(el.querySelector('.cover'), slot, () => {
+        st.flying.delete(id);
+        const s = tray.querySelector(`[data-tray="${id}"]`);
+        if (s) { s.classList.remove('pending'); s.classList.add('land'); }
+      });
+    } else {
+      updatePicks();
+    }
+  }
+
+  function openSheet(animate = true) {
+    st.draft = [...st.sel];                        // 前回の選択を復元（featuredOrder の小さい順のイメージ）
+    st.sheet = { status: null, q: '' };
+    sheetInput.value = '';
+    renderPicks();
+    sheet.querySelector('.sheet-scroll').scrollTop = 0;
+    if (!animate) phone.classList.add('no-anim');
+    phone.classList.add('sheet-open');
+    if (!animate) requestAnimationFrame(() => requestAnimationFrame(() => phone.classList.remove('no-anim')));
+  }
+  function closeSheet(apply) {
+    if (apply) {
+      st.draft.forEach(id => { if (!st.sel.includes(id)) st.fresh.add(id); });
+      st.sel = [...st.draft];                      // 名刺へ反映（※まだ保存はしない）
+      renderCard();
+    }
+    phone.classList.remove('sheet-open');
+  }
+
+  /* ----- イベント ----- */
+  sheetInput.addEventListener('input', () => { st.sheet.q = sheetInput.value; renderPicks(); });
+  sheetChips.addEventListener('click', e => {
+    const c = e.target.closest('[data-chip]'); if (!c) return;
+    st.sheet.status = c.dataset.chip || null; renderPicks();
+  });
+  pickGrid.addEventListener('click', e => {
+    const p = e.target.closest('[data-pick]'); if (!p) return;
+    togglePick(+p.dataset.pick, p);
+  });
+  if (tray) tray.addEventListener('click', e => {
+    const t = e.target.closest('[data-tray]'); if (!t) return;
+    const id = +t.dataset.tray;
+    if (st.flying.has(id)) return;
+    st.draft.splice(st.draft.indexOf(id), 1);
+    updatePicks();
+  });
+  phone.addEventListener('click', e => {
+    const a = e.target.closest('[data-act]');
+    const tEl = e.target.closest('[data-title]');
+    if (tEl) { st.titleIdx = +tEl.dataset.title; renderCard(); }
+    if (!a) return;
+    switch (a.dataset.act) {
+      case 'open': openSheet(); break;
+      case 'cancel': closeSheet(false); break;
+      case 'done': closeSheet(true); break;
+      case 'share': toast('ここから先は S-08（シェア画面）です'); break;
+      case 'reset': alertEl.classList.add('show'); break;
+      case 'alert-cancel': alertEl.classList.remove('show'); break;
+      case 'alert-ok': alertEl.classList.remove('show'); st.sel = []; renderCard(); break;
+    }
+  });
+  phone.querySelector('.dim').addEventListener('click', () => closeSheet(false));
+  phone.addEventListener('click', e => {
+    if (e.target.closest('[data-tap]') && opts.onTap) opts.onTap();
+  }, true);
+
+  renderMain();
+  if (opts.sheetOpen) {
+    openSheet(false);
+    st.draft = [...(opts.draft || [])];
+    if (opts.sheetStatus !== undefined) st.sheet.status = opts.sheetStatus;
+    renderPicks();
+  }
+  return { reset() { mountPhone(host, opts); } };
+}
+
+/* ---------- 画面を並べる ---------- */
+const row = document.getElementById('row');
+function addScreen(label, sub, opts, live) {
+  const wrap = document.createElement('div');
+  wrap.className = 'screen-wrap';
+  wrap.innerHTML = `<div class="screen-label ${live ? 'live' : ''}">${label}</div>${sub ? `<div class="screen-sublabel">${sub}</div>` : ''}<div class="host"></div>`;
+  row.appendChild(wrap);
+  const host = wrap.querySelector('.host');
+  if (live) {
+    const box = document.createElement('div');
+    box.className = 'tapbox';
+    box.innerHTML = `ここまでのタップ数 <b>0</b> 回 <button>最初からやり直す</button>`;
+    wrap.appendChild(box);
+    let taps = 0;
+    const counter = box.querySelector('b');
+    opts.onTap = () => { counter.textContent = ++taps; };
+    box.querySelector('button').addEventListener('click', () => { taps = 0; counter.textContent = 0; mountPhone(host, opts); });
+  }
+  mountPhone(host, opts);
+}
+
+addScreen('▶ 触ってみる · 案4', '名刺タブから。空き枠かボタンをタップ → 本を選ぶ → 「この◯冊で名刺をつくる」', { screen: 'card', sel: [] }, true);
+addScreen('S-06 · 名刺（まだ0冊）', '最初の状態。どの枠を押しても同じシートが開く', { screen: 'card', sel: [] });
+addScreen('S-06 · 本を選ぶシート（案4・トレイ付き）', '4冊選んだところ。検索・チップの絞り込みは本棚と同じ', { screen: 'card', sel: [], sheetOpen: true, draft: [1, 7, 4, 10] });
+addScreen('S-06 · 名刺（反映後）', '完了すると名刺に並ぶ。ここではまだ保存しない（画像化に成功したら featuredOrder に保存）', { screen: 'card', sel: [1, 7, 4, 10, 2, 8, 14] });
+addScreen('S-01 · 本棚（今の実装に合わせた版）', '選択シートの見た目はこの画面を下敷きにしている', { screen: 'shelf' });
+</script>
+</body>
+</html>

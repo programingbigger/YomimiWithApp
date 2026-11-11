@@ -6,6 +6,7 @@
 //　S-04　手動登録
 
 import SwiftUI
+import SwiftData
 
 // 既存のRegistrationModeを拡張する形で、スキャン成功後のバナー表示の規格を設定（modeは画面に影響されてはいけない設計のため、このように記載）
 private extension RegistrationMode {

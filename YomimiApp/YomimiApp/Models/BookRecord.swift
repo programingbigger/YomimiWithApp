@@ -22,6 +22,8 @@ import SwiftData
 
 @Model // このクラスをSwiftDataの保存対象にする
 final class BookRecord {
+    
+    // 型定義
     @Attribute(.unique) var id: UUID   // 将来のFirebase連携用（仕様書 3.2）Attribute(.hogehoge)が特殊なルールを付ける
     var isbn: String?
     var title: String
@@ -34,7 +36,7 @@ final class BookRecord {
     var finishedDate: Date?
     var rating: Int?                   // 1〜5
     var memo: String?
-    var isFeatured: Bool               // 名刺10冊フラグ
+    var featuredOrder: Int? // 名刺代わりの10冊。1〜10の数字は並び順兼名刺代わりとして選んでいるフラグ
     var createdAt: Date
     var updatedAt: Date
     
@@ -44,6 +46,8 @@ final class BookRecord {
     var cCode: String?
     var subjectText: [String]?
     
+    
+    // 初期化（BookRecordが呼ばれた時の状態）
     init(
         id: UUID = UUID(),
         isbn: String? = nil,
@@ -57,7 +61,7 @@ final class BookRecord {
         finishedDate: Date? = nil,
         rating: Int? = nil,
         memo: String? = nil,
-        isFeatured: Bool = false,
+        featuredOrder: Int? = nil,
         createdAt: Date = .now,
         updatedAt: Date = .now,
         pageCount: Int? = nil,
@@ -77,7 +81,7 @@ final class BookRecord {
         self.finishedDate = finishedDate
         self.rating = rating
         self.memo = memo
-        self.isFeatured = isFeatured
+        self.featuredOrder = featuredOrder
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.pageCount = pageCount

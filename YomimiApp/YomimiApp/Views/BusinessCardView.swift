@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct BusinessCardView: View {
+    
+    @State var isShowingSelectBookView: Bool = false
+    @State var SelectCount: Int = 0
+    
     var body: some View {
         
         NavigationStack {
@@ -27,31 +31,51 @@ struct BusinessCardView: View {
                 // 名刺代わりの本10選作成UI
                 VStack {
                     
-                    // 選択した本の冊数
-                    Text("10冊中 8冊を選択中")
+                    // 見出し
+                    Text("名刺代わりの本 / 小説を選ぼう")
+                        .font(.title2)
+                        .foregroundStyle(.textPrimary)
+                    Text("小説だけを選んでもOK。")
+                    Text("ハッシュタグはシェアの時に選べます")
+                    
+                    // 10冊中、いくつ選んだか？
+                    Text("10冊中\(String(SelectCount))冊を選択中")
                     
                     // 10選本棚
-                    LazyVGrid(columns: [GridItem(), GridItem(), GridItem(),  GridItem()]) {
+                    LazyVGrid(columns: [GridItem(), GridItem(), GridItem()]) {
                         ForEach(0..<10) { _ in
-                            Capsule()
-                                .frame(width: 90, height: 120)
+                            Button {
+                                isShowingSelectBookView = true
+                                SelectCount += 1
+                            } label: {
+                                Capsule()
+                                    .frame(width: 90, height: 120)
+                                    .background(Color.appBorder)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                            }
                         }
+                        .sheet(isPresented: $isShowingSelectBookView) {
+                            SelectBookView()
+                                .presentationDetents([.large])
+                            }
                     }
-                    
-                    // コメント
-                    Text("読書が好きで、夜景や光のある話が特に好きです✨本を通じて色んな人と繋がりたいです！")
                     
                     // Xシェアボタン
                     Button {
-                        
+                        isShowingSelectBookView = true
+                        SelectCount += 1
                     } label: {
-                        Text("Xでシェア")
+                        Text("📚名刺代わりの本を選ぼう")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color.blue)
+                            .background(Color.accentColor)
                             .cornerRadius(12)
+                    }
+                    .sheet(isPresented: $isShowingSelectBookView) {
+                        SelectBookView()
+                            .presentationDetents([.large])
                     }
                 }
                 .padding(30)

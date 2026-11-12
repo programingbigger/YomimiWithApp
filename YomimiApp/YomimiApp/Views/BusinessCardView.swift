@@ -43,15 +43,31 @@ struct BusinessCardView: View {
                     
                     // 10選本棚
                     LazyVGrid(columns: [GridItem(), GridItem(), GridItem()]) {
-                        ForEach(0..<10) { _ in
+                        ForEach(0 ..< 10) { index in
                             Button {
                                 isShowingSelectBookView = true
                                 SelectCount += 1
                             } label: {
-                                Capsule()
-                                    .frame(width: 90, height: 120)
-                                    .background(Color.appBorder)
-                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                                
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(Color.appBorder)
+                                        .frame(width: 90, height: 120)
+                                        .opacity(0.5)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .stroke(style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
+                                                .opacity(0.5)
+                                        )
+                                    VStack {
+                                        Text("+")
+                                            .padding(3)
+                                        Text("\(index+1)")
+                                    }
+                                    .foregroundStyle(Color.textSecondary)
+                                }
+                                
+
                             }
                         }
                         .sheet(isPresented: $isShowingSelectBookView) {

@@ -4,5 +4,7 @@
 <dict>
 	<key>AppToken</key>
 	<string>$(APP_TOKEN)</string>
+    <key>UIUserInterfaceStyle</key>
+    <string>Automatic</string>
 </dict>
 </plist>

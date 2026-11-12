@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    
     var body: some View {
 
         
@@ -98,7 +100,7 @@ struct SettingsView: View {
                                 .shadow(color: .black.opacity(0.08), radius: 8, y:2)
                                 .frame(height: 150)
                             VStack {
-                                Text("ダークモード")
+                                Toggle("ダークモード", isOn: $isDarkMode)
                                 Text("通知設定")
                             }
                         }

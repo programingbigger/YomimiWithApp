@@ -6,6 +6,18 @@
 //
 
 /*
+ # 役割
+ 読書ステータス（読了 / 読中 / 積読 / 読みたい）の選択肢を定義する
+ ・label で、画面に出す日本語を返す
+ ・色（color）はここではなく、Views/Components/ReadStatusColor 側で定義している
+ 
+ # 位置
+ 【データの型】BookRecord.status の中身。フロント側・処理側の両方から使われる
+ 
+ Models/⭐️ ⇨ BookRecord.status ⇨ Views/（バッジ・絞り込み・登録画面の選択肢）
+ */
+
+/*
  aaa = ReadStatus.finished
  status = aaa.label // 読了が出てくる
  */

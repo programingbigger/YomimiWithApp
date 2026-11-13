@@ -5,6 +5,20 @@
 //  Created by 奈宮史典 on 2026/09/20.
 //
 
+/*
+ # 役割
+ openBD の API から本の情報を取ってくる係（楽天で取れなかったときの予備）
+ ・ISBN を受け取り、openBD にリクエストを送る
+ ・返ってきた JSON を、アプリ共通の型（BookAPISummary）に変換して返す
+ ・見つからないときは BookAPIError.notFound を投げる
+ 
+ # 位置
+ 【処理側】アプリの外（インターネット）と話す一番外側。画面のことは何も知らない
+ 
+ Managers/BookSearchManager ⇨ Services/⭐️ ⇨ openBD API
+ Managers/BookSearchManager ⇦（BookAPISummary または エラー）Services/⭐️
+ */
+
 import Foundation
 
 // 1 OpenBD側のみから受け取る型

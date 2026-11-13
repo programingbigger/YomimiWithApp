@@ -5,6 +5,18 @@
 //  Created by 奈宮史典 on 2026/04/06.
 //　S-09　設定
 
+/*
+ # 役割
+ プロフィールやアプリの設定を行う画面（S-09 設定）
+ ・ダークモードのトグルを切り替えると、isDarkMode（端末に保存される設定値）が書き換わる
+ ・プロフィール / 通知 / データ削除は、現在は見た目のみ（冊数も仮の固定値）
+ 
+ # 位置
+ 【フロント側】設定値を書き換えるだけ。アプリ全体への反映は RootView の仕事
+ 
+ Views/⭐️（トグル）⇨ isDarkMode ⇨ Views/RootView（アプリ全体に反映）
+ */
+
 import SwiftUI
 
 struct SettingsView: View {

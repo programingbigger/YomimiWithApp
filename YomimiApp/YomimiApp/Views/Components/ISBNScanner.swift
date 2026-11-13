@@ -5,6 +5,19 @@
 //  Created by 奈宮史典 on 2026/09/01.
 //
 
+/*
+ # 役割
+ カメラでバーコードを読み取り、ISBN を取り出す部品
+ ・ScannerViewController：カメラを動かし、978 / 979 で始まるバーコード（ISBN）を見つける（UIKit 側）
+ ・ISBNScannerView：それを SwiftUI の画面から使えるようにする橋渡し役
+ ・見つけた ISBN は onScanned で呼び出し元の画面へ渡す（1回見つけたらカメラを止める）
+ 
+ # 位置
+ 【フロント側】データの流れの一番最初（入力装置）。ISBN を渡すだけで、本の検索はしない
+ 
+ カメラ ⇨ Components/⭐️ ⇨ Views/BarcodeScannerView ⇨ Managers/BookSearchManager
+ */
+
 import SwiftUI
 import AVFoundation
 

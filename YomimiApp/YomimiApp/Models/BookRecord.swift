@@ -6,6 +6,19 @@
 //
 
 /*
+ # 役割
+ 本棚に登録する本1冊分のデータの「設計図」。SwiftData に保存される形
+ ・タイトル / 著者 / ステータス / メモ / おすすめ度 などを持つ
+ ・@Model が付いているので、このクラスがそのまま保存対象になる
+ 
+ # 位置
+ 【データの型】フロント側でも処理側でもなく、両方から使われる
+ 
+ Views/BookRegistrationView（⭐️を作る）⇨ Managers/BookRegistrationManager（保存）⇨ SwiftData()
+ SwiftData() ⇨ Views/BookshelfView・BookDetailView（⭐️を読み出して表示・編集）
+ */
+
+/*
  
  ＜BookRecordクラスについて＞
  ・呼び出す際に、titleは必須項目

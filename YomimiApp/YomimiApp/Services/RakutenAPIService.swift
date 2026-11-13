@@ -5,6 +5,20 @@
 //  Created by 奈宮史典 on 2026/10/21.
 //
 
+/*
+ # 役割
+ 楽天の API から本の情報を取ってくる係（最初に呼ばれるメイン）
+ ・ISBN を受け取り、ハブ（中継サーバー）経由で楽天 API にリクエストを送る
+ ・通信の結果（圏外 / タイムアウト / ステータスコード）に応じて BookAPIError を投げ分ける
+ ・成功したら JSON を、アプリ共通の型（BookAPISummary）に変換して返す
+ 
+ # 位置
+ 【処理側】アプリの外（インターネット）と話す一番外側。画面のことは何も知らない
+ 
+ Managers/BookSearchManager ⇨ Services/⭐️ ⇨ ハブ ⇨ 楽天 API
+ Managers/BookSearchManager ⇦（BookAPISummary または BookAPIError）Services/⭐️
+ */
+
 import Foundation
 
 // 1 RakutenAPIService側のみから受け取る型
@@ -28,9 +42,6 @@ private struct RakutenAPIImte: Decodable {
     let Item: RakutenAPISummary?
 }
 
-//private struct RakutenAPIResponse: Decodable {
-//    let Items: [RakutenAPIImte]
-//}
 private struct RakutenAPIResponse: Decodable {
     let Items: [RakutenAPIImte]
 }

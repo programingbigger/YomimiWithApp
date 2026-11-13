@@ -5,6 +5,18 @@
 //  Created by 奈宮史典 on 2026/10/07.
 //
 
+/*
+ # 役割
+ 本の表紙（書影）を表示する部品
+ ・書影の URL があれば、その画像を読み込んで表示する（読み込みは AsyncImage が自動で行う）
+ ・URL が無い / 読み込めないときは、タイトルを書いた仮の表紙を表示する
+ 
+ # 位置
+ 【フロント側】いろいろな画面から呼ばれる部品。渡された値を表示するだけ
+ 
+ BookshelfView / SelectBookView / BookDetailView / BookRegistrationView ⇨ Components/⭐️
+ */
+
 import SwiftUI
 
 struct BookCoverView: View {

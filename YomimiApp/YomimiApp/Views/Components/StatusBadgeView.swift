@@ -5,6 +5,17 @@
 //  Created by 奈宮史典 on 2026/10/07.
 //
 
+/*
+ # 役割
+ 読書ステータスを「色付きの丸 ＋ 文字」のバッジで表示する部品
+ ・文言は ReadStatus.label、色は ReadStatus.color（ReadStatusColor）を使う
+ 
+ # 位置
+ 【フロント側】部品。渡されたステータスを表示するだけ
+ 
+ BookshelfView / SelectBookView / BookDetailView ⇨ Components/⭐️
+ */
+
 import SwiftUI
 
 struct StatusBadgeView: View {

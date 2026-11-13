@@ -5,6 +5,21 @@
 //  Created by 奈宮史典 on 2026/04/06.
 //　S-06〜08　名刺（プレビュー・選択・シェア）
 
+/*
+ # 役割
+ 「名刺代わりの本10選」を作る画面（S-06〜08 名刺）
+ ・10個の枠と「名刺代わりの本を選ぼう」ボタンを表示する
+ ・枠やボタンを押すと、本を選ぶシート（SelectBookView）を開く
+ 
+ # 位置
+ 【フロント側】現在は見た目とシートの開閉のみ（データの取得・保存はしていない）
+ 
+ Views/HomeView（名刺タブ）⇨ Views/⭐️ ⇨ Views/SelectBookView
+ 
+ # 補足
+ 選択数（SelectCount）は押した回数を数えているだけで、実際に選んだ本とはまだ連動していない
+ */
+
 import SwiftUI
 
 struct BusinessCardView: View {

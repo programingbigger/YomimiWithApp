@@ -6,14 +6,16 @@
 //
 
 /*
- # 補足
- ・ダークモード / ライトモードの切り替え
-    ・preferredColorSchemeを使用しない理由
-    ・「設定は切り替わっているのに、SwiftUI の preferredColorScheme がダーク→ライトの画面更新に失敗する、既知の不具合の疑いがある。
- ・対応
-    ・ウィンドウ全体の外観を直接切り替える関数を作成し、トグルのたびに「isDarkMode」フラグが変わるよにする
+ # 役割
+ アプリの入口（起動したら最初に動く場所）
+ ・最初に表示する画面として RootView を指定する
+ ・SwiftData の保存場所（modelContainer）を用意し、どの画面からも BookRecord を読み書きできるようにする
  
-*/
+ # 位置
+ 【土台】フロント側でも処理側でもなく、両方が動くための準備をする場所
+ 
+ App/⭐️ ⇨ Views/RootView ⇨ Views/HomeView ⇨ 各画面
+ */
 
 import SwiftUI
 import SwiftData

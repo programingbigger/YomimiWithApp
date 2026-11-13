@@ -5,6 +5,18 @@
 //  Created by 奈宮史典 on 2026/10/07.
 //
 
+/*
+ # 役割
+ 本棚の絞り込みに使うチップ（「すべて 12」「読了 4」のようなボタン）
+ ・タイトル / 冊数 / 色 / 選択中かどうか を受け取って表示する
+ ・押されたときに何をするか（action）は、呼び出し元から渡してもらう
+ 
+ # 位置
+ 【フロント側】部品。絞り込みそのものは呼び出し元（BookshelfView）が行う
+ 
+ Views/BookshelfView ⇨ Components/⭐️
+ */
+
 import SwiftUI
 
 struct StatusFilterChip: View {

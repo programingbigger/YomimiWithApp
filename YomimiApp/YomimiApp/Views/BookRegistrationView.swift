@@ -5,6 +5,20 @@
 //  Created by 奈宮史典 on 2026/04/06.
 //　S-04　手動登録
 
+/*
+ # 役割
+ 本の情報を確認・入力して、本棚に登録する画面（S-04 登録）
+ ・開かれ方（RegistrationMode：スキャン成功 / スキャン失敗 / 手動）に応じてバナーを出し分ける
+ ・スキャン成功時は、取得できた情報（BookAPISummary）を入力欄にあらかじめ入れておく
+ ・「本棚に登録する」で入力値から BookRecord を作り、BookRegistrationManager に渡す
+ ・登録に失敗したら、Manager が持つ errorMessage を表示する
+ 
+ # 位置
+ 【フロント側】入力を集めて渡すところまで。入力チェック・重複チェック・保存は Managers 側の仕事
+ 
+ Views/BarcodeScannerView ⇨ Views/⭐️ ⇨ Managers/BookRegistrationManager ⇨ SwiftData()
+ */
+
 import SwiftUI
 import SwiftData
 

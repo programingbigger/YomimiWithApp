@@ -5,6 +5,22 @@
 //  Created by 奈宮史典 on 2026/04/06.
 //　S-02　スキャン画面
 
+/*
+ # 役割
+ バーコードを読み取り、本の情報を探しにいく画面（S-02 スキャン）
+ ・カメラ部品（ISBNScannerView）から ISBN を受け取る
+ ・BookSearchManager に「この ISBN の本を探して」と頼む（自分では API を叩かない）
+ ・結果（読み込み中 / 成功 / エラー）を表示し、登録画面（BookRegistrationView）を開く
+    ・見つかった ⇨ .scanned ／ 見つからない ⇨ .scanFailed ／ 手動ボタン ⇨ .manual
+ 
+ # 位置
+ 【フロント側】データの流れの出発点。処理は Managers に任せ、結果を受け取って表示する
+ 
+ Components/ISBNScanner ⇨ Views/⭐️ ⇨ Managers/BookSearchManager ⇨ Services/
+ Views/⭐️ ⇦（結果）Managers/BookSearchManager
+ Views/⭐️ ⇨ Views/BookRegistrationView
+ */
+
 import SwiftUI
 
 struct BarcodeScannerView: View {

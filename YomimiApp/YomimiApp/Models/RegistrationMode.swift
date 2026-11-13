@@ -6,6 +6,17 @@
 //
 
 /*
+ # 役割
+ 登録画面（BookRegistrationView）が「どの経緯で開かれたか」を表す
+ ・scanned（スキャン成功。本の情報つき）/ scanFailed（スキャン失敗）/ manual（手動入力）
+ 
+ # 位置
+ 【データの型】画面から画面へ渡す「伝言メモ」。保存はされない
+ 
+ Views/BarcodeScannerView（⭐️を作る）⇨ Views/BookRegistrationView（⭐️を受け取って表示を変える）
+ */
+
+/*
 
 ・BarcodeScannerView.swiftの遷移先のモデルを定義する
 ・定義するのは以下の通り

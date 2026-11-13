@@ -5,6 +5,22 @@
 //  Created by 奈宮史典 on 2026/04/06.
 //　S-01　本棚（ホーム）
 
+/*
+ # 役割
+ 登録した本を一覧で見せる画面（S-01 本棚）
+ ・SwiftData に保存された本（BookRecord）を @Query で読み出して並べる
+ ・ステータス（読了 / 読中 / 積読 / 読みたい）のチップで絞り込む
+ ・本をタップすると本詳細（BookDetailView）へ進む
+ 
+ # 位置
+ 【フロント側】表示が中心。読み出しは @Query が自動で行うので、Managers は通していない
+ 
+ SwiftData(BookRecord) ⇨ Views/⭐️ ⇨ Views/BookDetailView
+ 
+ # 補足
+ 検索窓（searchBookTitle）は入力欄の表示のみで、絞り込みにはまだ使っていない
+ */
+
 import SwiftUI
 import SwiftData
 

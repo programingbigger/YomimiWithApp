@@ -5,6 +5,18 @@
 //  Created by 奈宮史典 on 2026/09/20.
 //
 
+/*
+ # 役割
+ 「本の情報を取ってくる係（Service）」が守る共通ルールを決める
+ ・BookAPIService：ISBN を渡したら BookAPISummary を返す、という約束（プロトコル）
+ ・BookAPIError：取得に失敗したときの理由の種類（圏外 / タイムアウト / 見つからない など）
+ 
+ # 位置
+ 【処理側】ルールだけで、実際の通信は書かれていない。実物は RakutenAPIService / OpenBDService
+ 
+ Managers/BookSearchManager ⇨ Services/⭐️（ルール）⇨ RakutenAPIService / OpenBDService
+ */
+
 import Foundation
 
 

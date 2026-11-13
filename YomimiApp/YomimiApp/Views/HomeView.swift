@@ -5,6 +5,20 @@
 //  Created by 奈宮史典 on 2026/04/06.
 //
 
+/*
+ # 役割
+ タブバー（本棚 / お楽しみ / 名刺 / 設定）と、中央のカメラボタンを持つ土台の画面
+ ・タブで表示する画面を切り替える
+ ・カメラボタンが押されたら、スキャン画面（BarcodeScannerView）を全画面で開く
+ ・真ん中の空のタブは、カメラボタンを置くための場所取り
+ 
+ # 位置
+ 【フロント側】画面の切り替えだけを担当（データの取得・保存はしない）
+ 
+ Views/RootView ⇨ Views/⭐️ ⇨ BookshelfView / BusinessCardView / SettingsView
+ Views/⭐️（カメラボタン）⇨ Views/BarcodeScannerView
+ */
+
 import SwiftUI
 
 struct HomeView: View {

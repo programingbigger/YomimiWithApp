@@ -29,16 +29,38 @@ struct SelectBookView: View {
     @Environment(\.dismiss) var dismiss
     @State var searchBookTitle: String = ""
     @Query(sort: \BookRecord.createdAt, order: .reverse) private var books: [BookRecord]
+    @Query(filter: #Predicate<BookRecord> { $0.featuredOrder != nil }, sort: \BookRecord.featuredOrder) var orderedbooks: [BookRecord]
     @State private var selectedStatus: ReadStatus? = nil // nilの場合は「すべて」となる
+    @State private var SelectedBookIDs: [UUID] = [] // 選んだ本を格納するリスト
+    @State private var isOnlySelected: Bool = false
+    let MaxSelected: Int = 10
     
-    
-    // 本に対するステータスで絞った場合と「すべて」の場合の分岐
+    // ステータスに応じて表示する本一覧を制限
     private var filteredBooks: [BookRecord] {
-        
+        // ステータスで絞られた時
         if let status = selectedStatus {
             return books.filter { $0.status == status }
-        } else {
+        }
+        
+        // 名刺として選択された本のみ
+        else if isOnlySelected {
+            return orderedbooks
+        }
+        
+        // 全て表示
+        else {
             return books
+        }
+    }
+    
+    // 本の選択に応じた関数
+    private func toggleSelection(book: BookRecord) {
+        if let i = SelectedBookIDs.firstIndex(of: book.id) {
+            SelectedBookIDs.remove(at: i)
+            book.featuredOrder = nil
+        } else if SelectedBookIDs.count < MaxSelected {
+            SelectedBookIDs.append(book.id)
+            book.featuredOrder = SelectedBookIDs.firstIndex(of: book.id)
         }
     }
     
@@ -96,9 +118,12 @@ struct SelectBookView: View {
                                             , GridItem(.flexible(), alignment: .top)
                                             , GridItem(.flexible(), alignment: .top)]) {
                             ForEach(filteredBooks) { book in
-                                NavigationLink {
-                                    BookDetailView(book: book)
+                                
+                                Button {
+                                    toggleSelection(book: book)
+                                    
                                 } label: {
+                                    // 1冊の本の表紙を描画
                                     VStack(alignment: .leading) {
                                         
                                         // 書影
@@ -114,9 +139,19 @@ struct SelectBookView: View {
                                         StatusBadgeView(status: book.status)
                                     }
                                     .frame(maxWidth: 100, alignment: .leading)
-                                    
+                                    .overlay {
+                                        if let index = SelectedBookIDs.firstIndex(of: book.id)  {
+                                            ZStack {
+                                                RoundedRectangle(cornerRadius: 20)
+                                                    .fill(Color.white)
+                                                    .frame(maxWidth: 100, alignment: .leading)
+                                                Text("\(index + 1)")
+                                            }
+                                        }
+
+                                    }
                                 }
-                                .buttonStyle(.plain) // リンクの青文字化を防ぐ
+                                .buttonStyle(.plain)
                             }
                         }
                     }
@@ -126,7 +161,35 @@ struct SelectBookView: View {
                 
                 Divider()
                 
+                // 本選択状況
+                VStack {
+                    // 選択状況
+                    HStack {
+                        Text("10冊中\(SelectedBookIDs.count)を選択中")
+                        Spacer()
+                        
+                        // カスタムボタンを作成する必要がある
+                        Button {
+                            isOnlySelected.toggle()
+                        } label: {
+                            Text("選択中だけ見る")
+                        }
+                    }
+                    // 本を自己紹介画面へ反映ボタン（カスタムボタンを作成する必要がある）
+                    Button {
+                        
+                    } label: {
+                        Text("本をタップして選んでね")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.accentColor)
+                            .cornerRadius(12)
+                    }
+                }
             }
+            .padding(20)
             .navigationTitle("名刺の本を選ぶ")
             .navigationBarTitleDisplayMode(.inline)
             .background(Color("AppBackground"))

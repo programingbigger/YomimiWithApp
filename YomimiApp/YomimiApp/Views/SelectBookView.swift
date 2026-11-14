@@ -14,11 +14,6 @@
  # 位置
  【フロント側】表示が中心。読み出しは @Query が自動で行うので、Managers は通していない
  
- Views/BusinessCardView ⇨ Views/⭐️ ⇦ SwiftData(BookRecord)
- 
- # 補足
- ・選んだ本を名刺に反映する処理（BookRecord.featuredOrder への保存）はまだ無い
- ・絞り込み用の selectedStatus は用意だけしてあり、切り替える UI はまだ無い
  */
 
 import SwiftUI
@@ -27,9 +22,9 @@ import SwiftData
 struct SelectBookView: View {
     
     @Environment(\.dismiss) var dismiss
-    @State var searchBookTitle: String = ""
     @Query(sort: \BookRecord.createdAt, order: .reverse) private var books: [BookRecord]
     @Query(filter: #Predicate<BookRecord> { $0.featuredOrder != nil }, sort: \BookRecord.featuredOrder) var orderedbooks: [BookRecord]
+    @State var searchBookTitle: String = ""
     @State private var selectedStatus: ReadStatus? = nil // nilの場合は「すべて」となる
     @State private var SelectedBookIDs: [UUID] = [] // 選んだ本を格納するリスト
     @State private var isOnlySelected: Bool = false
@@ -102,9 +97,8 @@ struct SelectBookView: View {
                     .padding(.horizontal)
                 }
                 
-                //ヒント
-                Text("💡読み終わったら「読中」→本をタップ→ステータス変更")
-                
+                Spacer()
+                                
                 // 本棚一覧
                 if filteredBooks.isEmpty {
                     ContentUnavailableView(
@@ -129,6 +123,25 @@ struct SelectBookView: View {
                                         // 書影
                                         BookCoverView(title: book.title, thumbnailURL: book.thumbnailURL)
                                             .frame(width: 100, height: 150)
+                                            
+                                            // 名刺を表示するための本が選ばれたときの描画
+                                            .overlay { // 枠
+                                                if SelectedBookIDs.contains(book.id)  {
+                                                    RoundedRectangle(cornerRadius: 6)
+                                                        .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 6))
+                                                }
+                                            }
+                                            .overlay(alignment: .topTrailing) { // 右上の丸。位置は右上
+                                                if let index = SelectedBookIDs.firstIndex(of: book.id) {
+                                                    Text("\(index + 1)")
+                                                        .font(.system(size: 13, weight: .bold))
+                                                        .foregroundStyle(.white)
+                                                        .frame(width: 26, height: 26)
+                                                        .background(Circle().fill(Color.accentColor))
+                                                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                                                        .offset(x: 7, y: -7)        // 右上の角から外へ、少しはみ出させる
+                                                    }
+                                                }
                                         
                                         // 書籍タイトル
                                         Text(book.title)
@@ -139,21 +152,11 @@ struct SelectBookView: View {
                                         StatusBadgeView(status: book.status)
                                     }
                                     .frame(maxWidth: 100, alignment: .leading)
-                                    .overlay {
-                                        if let index = SelectedBookIDs.firstIndex(of: book.id)  {
-                                            ZStack {
-                                                RoundedRectangle(cornerRadius: 20)
-                                                    .fill(Color.white)
-                                                    .frame(maxWidth: 100, alignment: .leading)
-                                                Text("\(index + 1)")
-                                            }
-                                        }
-
-                                    }
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
+                        .padding(.top, 12) // 選択された本がスクロールで見切れないようにするため
                     }
                     .padding(.bottom, 20) // 本タブのための余白
                 }
@@ -176,17 +179,7 @@ struct SelectBookView: View {
                         }
                     }
                     // 本を自己紹介画面へ反映ボタン（カスタムボタンを作成する必要がある）
-                    Button {
-                        
-                    } label: {
-                        Text("本をタップして選んでね")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.accentColor)
-                            .cornerRadius(12)
-                    }
+                    DecidedButton(SelectedBookIDs: SelectedBookIDs)
                 }
             }
             .padding(20)
@@ -201,6 +194,36 @@ struct SelectBookView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+// 名刺n冊 決定ボタン
+private struct DecidedButton: View {
+    
+    let SelectedBookIDs: [UUID]
+    
+    var body: some View {
+        if SelectedBookIDs != [] {
+            Button {
+                
+            } label: {
+                Text("この\(SelectedBookIDs.count)冊で名詞を作る")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
+            }
+        } else {
+            Text("本をタップして選んでね")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color.tabInactive)
+                .cornerRadius(12)
         }
     }
 }

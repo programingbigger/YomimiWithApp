@@ -96,7 +96,7 @@ struct BusinessCardView: View {
                         isShowingSelectBookView = true
                         SelectCount += 1
                     } label: {
-                        Text("📚名刺代わりの本を選ぼう")
+                        Text("📚名刺代わりの本を選ぶ")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
